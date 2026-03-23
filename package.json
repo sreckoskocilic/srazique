@@ -1,0 +1,86 @@
+{
+  "name": "srazique",
+  "productName": "Srazique",
+  "version": "1.0.0",
+  "description": "Sraz Rebirth",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "obfuscate": "node scripts/obfuscate.js",
+    "build:mac": "npm run obfuscate && electron-builder --mac",
+    "build:win": "npm run obfuscate && electron-builder --win",
+    "build": "npm run obfuscate && electron-builder --mac --win"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^41.0.0",
+    "electron-builder": "26.8.1",
+    "javascript-obfuscator": "^5.4.1"
+  },
+  "build": {
+    "appId": "com.srazique.game",
+    "productName": "srazique",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.games",
+      "icon": "icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "asar": true,
+    "files": [
+      "index.html",
+      "main.js"
+    ],
+    "compression": "store"
+  }
+}
