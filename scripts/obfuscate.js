@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const JavaScriptObfuscator = require('javascript-obfuscator/dist/index.js');
 
+const cleanHtmlPath = path.join(__dirname, '..', 'tests', 'fixtures', 'index.clean.html');
 const htmlPath = path.join(__dirname, '..', 'index.html');
-const html = fs.readFileSync(htmlPath, 'utf8');
+const html = fs.readFileSync(cleanHtmlPath, 'utf8');
 
 const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
 if (!scriptMatch) {
@@ -36,14 +37,7 @@ try {
   process.exit(1);
 }
 
-// Back up the current index.html before overwriting
-const backupPath = htmlPath + '.bak';
-fs.copyFileSync(htmlPath, backupPath);
-
 const newHtml = html.replace(scriptMatch[1], obfuscatedCode);
 fs.writeFileSync(htmlPath, newHtml, 'utf8');
-
-// Remove backup only after successful write
-fs.unlinkSync(backupPath);
 
 process.stdout.write('Obfuscation complete!\n');
