@@ -21,8 +21,8 @@ module.exports = [
       html
     },
     rules: {
-      'no-unused-vars': 'warn',
-      'no-console': 'off'
+      'no-unused-vars': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }]
     }
   }
 ];

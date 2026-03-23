@@ -197,3 +197,38 @@ describe('Package Lock', () => {
     expect(lock.packages).toBeDefined();
   });
 });
+
+describe('Clean HTML Constants', () => {
+  const cleanHtmlPath = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html');
+  const cleanHtmlExists = fs.existsSync(cleanHtmlPath);
+
+  if (cleanHtmlExists) {
+    const code = fs.readFileSync(cleanHtmlPath, 'utf8');
+
+    it('should have Q_API_BATCH_SIZE constant', () => expect(code).toContain('Q_API_BATCH_SIZE'));
+    it('should have Q_API_MAX_BATCHES constant', () => expect(code).toContain('Q_API_MAX_BATCHES'));
+    it('should have Q_API_TIMEOUT_MS constant', () => expect(code).toContain('Q_API_TIMEOUT_MS'));
+    it('should have Q_API_DELAY_MS constant', () => expect(code).toContain('Q_API_DELAY_MS'));
+    it('should have COORD_BASE constant', () => expect(code).toContain('COORD_BASE'));
+    it('should not use bare 8000ms timeout literal', () => expect(code).not.toContain('AbortSignal.timeout(8000)'));
+    it('should not use bare 250ms delay literal', () => expect(code).not.toContain('setTimeout(r, 250)'));
+    it('should use try/finally in fetchQuestionsBackground', () => expect(code).toContain('} finally {'));
+    it('should guard updateTileDOM against null game', () => expect(code).toContain("function updateTileDOM") && expect(code).toContain('if (!State.game) return;'));
+    it('should guard flushUpdates against null game', () => expect(code).toContain('function flushUpdates'));
+    it('should have bounds check in movePegTo', () => expect(code).toContain('r < 0 || r >= S || c < 0 || c >= S'));
+    it('should use dataset.size in setBoardSize', () => expect(code).toContain('btn.dataset.size'));
+    it('should reset dirty flags in resetGame', () => expect(code).toContain('State.dirty.board = false'));
+    it('should encode validMoves consistently in handleNormalMove', () =>
+      expect(code).toContain('new Set(getValidMoves(State.game.selectedPegId).map(({r,c}) => r * COORD_BASE + c))'));
+    it('should guard handleCombatQ1 against null State.game', () =>
+      expect(code).toContain('function handleCombatQ1') && expect(code).toContain('if (!State.game) return;'));
+    it('should guard checkEndGame setTimeout against null State.game', () =>
+      expect(code).toContain('if (State.game) showGameOver(winner)'));
+    it('should guard finishBattle against null State.game', () =>
+      expect(code).toContain('function finishBattle'));
+    it('should guard flushUIUpdates peg access', () =>
+      expect(code).toContain('if (peg) {'));
+    it('should guard updateTileDOM peg lookup', () =>
+      expect(code).toContain('if (!peg) return;'));
+  }
+});

@@ -12,7 +12,7 @@ if (!scriptMatch) {
 }
 
 const originalJs = scriptMatch[1];
-console.log('Obfuscating JavaScript...');
+process.stdout.write('Obfuscating JavaScript...\n');
 
 const obfuscationResult = JavaScriptObfuscator.obfuscate(originalJs, {
   compact: true,
@@ -26,7 +26,24 @@ const obfuscationResult = JavaScriptObfuscator.obfuscate(originalJs, {
   numbersToExpressions: true,
 });
 
-const newHtml = html.replace(scriptMatch[1], obfuscationResult.getObfuscatedCode());
+const obfuscatedCode = obfuscationResult.getObfuscatedCode();
+
+// Validate the obfuscated output is parseable JS before writing
+try {
+  new Function(obfuscatedCode);
+} catch (e) {
+  console.error('Obfuscated output is invalid JavaScript — aborting write:', e.message);
+  process.exit(1);
+}
+
+// Back up the current index.html before overwriting
+const backupPath = htmlPath + '.bak';
+fs.copyFileSync(htmlPath, backupPath);
+
+const newHtml = html.replace(scriptMatch[1], obfuscatedCode);
 fs.writeFileSync(htmlPath, newHtml, 'utf8');
 
-console.log('Obfuscation complete!');
+// Remove backup only after successful write
+fs.unlinkSync(backupPath);
+
+process.stdout.write('Obfuscation complete!\n');

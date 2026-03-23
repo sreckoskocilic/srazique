@@ -34,8 +34,8 @@ npm run build:mac
 
 ## Build Output
 
-- Windows: `dist/Srazique Setup 1.0.0.exe`
-- macOS: `dist/Srazique-1.0.0.dmg`
+- Windows: `dist/Srazique-Setup-{version}.exe` (version from package.json)
+- macOS: `dist/Srazique-{version}.dmg`
 
 ## License
 
