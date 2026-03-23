@@ -10,6 +10,12 @@ This version features 1000+ questions sourced by scraping pub quiz sets, Wikiped
 
 > For the best overview of the original 1993 DOS game, see: [Sraz (1993) — prvi domaći kviz znanja na računalu koji je spojio igru i učenje](https://virus.hr/en/sraz-1993-prvi-domaci-kviz-znanja-na-racunalu-koji-je-spojio-igru-i-ucenje/)
 
+## Screenshots
+
+![Board](screenshots/board.png)
+![Question](screenshots/question.png)
+![Correct Answer](screenshots/correct.png)
+
 ## Features
 
 - 2-4 player local multiplayer
