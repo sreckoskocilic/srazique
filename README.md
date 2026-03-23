@@ -2,7 +2,7 @@
 
 Strategic board game built with Electron.
 
-![CI](https://github.com/skocho/srazique/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/sreckoskocilic/srazique/actions/workflows/ci.yml/badge.svg)
 
 ## Features
 
