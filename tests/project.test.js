@@ -33,7 +33,7 @@ describe('package.json Validation', () => {
   it('should have asar enabled', () => expect(pkg.build.asar).toBe(true));
   it('should have productName', () => expect(pkg.build.productName).toBe('Srazique'));
   it('should have author', () => expect(pkg.author).toBe('Srecko Skocilic'));
-  it('should have license', () => expect(pkg.license).toBe('ISC'));
+  it('should have license', () => expect(pkg.license).toBe('MIT'));
 });
 
 describe('main.js Validation', () => {
@@ -102,7 +102,7 @@ describe('Obfuscate Script', () => {
   it('should have renameVariables option', () => expect(content).toContain('renameVariables'));
   it('should handle script not found error', () => expect(content).toContain('No script found'));
   it('should exit on error', () => expect(content).toContain('process.exit(1)'));
-  it('should log progress', () => expect(content).toContain('console.log'));
+  it('should log progress', () => expect(content).toContain('process.stdout.write'));
 });
 
 describe('Git Configuration', () => {
