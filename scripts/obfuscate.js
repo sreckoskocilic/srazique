@@ -4,6 +4,12 @@ const JavaScriptObfuscator = require('javascript-obfuscator/dist/index.js');
 
 const cleanHtmlPath = path.join(__dirname, '..', 'tests', 'fixtures', 'index.clean.html');
 const htmlPath = path.join(__dirname, '..', 'index.html');
+
+if (!fs.existsSync(cleanHtmlPath)) {
+  process.stdout.write('index.clean.html not found — skipping obfuscation.\n');
+  process.exit(0);
+}
+
 const html = fs.readFileSync(cleanHtmlPath, 'utf8');
 
 const scriptMatch = html.match(/<script>([\s\S]*?)<\/script>/);
