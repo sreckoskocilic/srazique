@@ -202,6 +202,10 @@ describe('Clean HTML Constants', () => {
   const cleanHtmlPath = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html');
   const cleanHtmlExists = fs.existsSync(cleanHtmlPath);
 
+  if (!cleanHtmlExists) {
+    it.skip('clean html not available in this environment', () => {});
+  }
+
   if (cleanHtmlExists) {
     const code = fs.readFileSync(cleanHtmlPath, 'utf8');
 

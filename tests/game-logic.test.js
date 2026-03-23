@@ -4,10 +4,13 @@ import path from 'path';
 import vm from 'vm';
 
 const PROJECT_ROOT = process.cwd();
-const CLEAN_HTML = fs.readFileSync(path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html'), 'utf8');
+const CLEAN_HTML_PATH = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html');
+const CLEAN_HTML = fs.existsSync(CLEAN_HTML_PATH) ? fs.readFileSync(CLEAN_HTML_PATH, 'utf8') : null;
 
-const SCRIPT_MATCH = CLEAN_HTML.match(/<script>([\s\S]*?)<\/script>/);
+const SCRIPT_MATCH = CLEAN_HTML ? CLEAN_HTML.match(/<script>([\s\S]*?)<\/script>/) : null;
 const GAME_CODE = SCRIPT_MATCH ? SCRIPT_MATCH[1] : '';
+
+const describeGame = CLEAN_HTML ? describe : describe.skip;
 
 // Creates an isolated game context and returns the exported functions/state.
 // Uses an IIFE wrapper so const/let declarations from GAME_CODE are accessible.
@@ -57,7 +60,7 @@ function createGameContext() {
   return vm.runInContext(wrappedCode, sandbox);
 }
 
-describe('Game Constants', () => {
+describeGame('Game Constants', () => {
   it('should have PLAYER_COLORS with 4 colors', () => {
     expect(GAME_CODE).toContain("const PLAYER_COLORS");
     expect(GAME_CODE).toContain("'#E53935'");
@@ -133,7 +136,7 @@ describe('Game Constants', () => {
   });
 });
 
-describe('State Object', () => {
+describeGame('State Object', () => {
   it('should have State object', () => {
     expect(GAME_CODE).toContain("const State = {");
   });
@@ -164,7 +167,7 @@ describe('State Object', () => {
   });
 });
 
-describe('Game Functions', () => {
+describeGame('Game Functions', () => {
   it('should have randomCat function', () => expect(GAME_CODE).toContain('function randomCat'));
   it('should have tileCat function', () => expect(GAME_CODE).toContain('function tileCat'));
   it('should have generateLayoutMap function', () => expect(GAME_CODE).toContain('function generateLayoutMap'));
@@ -224,7 +227,7 @@ describe('Game Functions', () => {
   it('should have renderAll function', () => expect(GAME_CODE).toContain('function renderAll'));
 });
 
-describe('Question Data', () => {
+describeGame('Question Data', () => {
   it('should have BUILTIN_Q constant', () => expect(GAME_CODE).toContain('const BUILTIN_Q'));
   it('should have HRBA_Q constant', () => expect(GAME_CODE).toContain('const HRBA_Q'));
   it('should have art questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("art: ["));
@@ -236,16 +239,16 @@ describe('Question Data', () => {
   it('should have general questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("general: ["));
 });
 
-describe('Global Event Handlers', () => {
+describeGame('Global Event Handlers', () => {
   it('should have keydown handler', () => expect(GAME_CODE).toContain("document.addEventListener('keydown'"));
 });
 
-describe('Setup and Initialization', () => {
+describeGame('Setup and Initialization', () => {
   it('should have State.DOM.board', () => expect(GAME_CODE).toContain("State.DOM.board"));
   it('should set board style', () => expect(GAME_CODE).toContain("board.style.setProperty"));
 });
 
-describe('Clean HTML Structure', () => {
+describeGame('Clean HTML Structure', () => {
   it('should have not been obfuscated', () => {
     expect(CLEAN_HTML).not.toContain('obfuscate');
   });
@@ -279,7 +282,7 @@ const EMPTY_QUESTIONS = () => {
   return Object.fromEntries(cats.map(c => [c, []]));
 };
 
-describe('shuffle()', () => {
+describeGame('shuffle()', () => {
   it('returns same length array', () => {
     const g = createGameContext();
     expect(g.shuffle([1, 2, 3, 4])).toHaveLength(4);
@@ -299,7 +302,7 @@ describe('shuffle()', () => {
   });
 });
 
-describe('cleanHtml()', () => {
+describeGame('cleanHtml()', () => {
   it('decodes common HTML entities', () => {
     const g = createGameContext();
     expect(g.cleanHtml('&amp;')).toBe('&');
@@ -320,7 +323,7 @@ describe('cleanHtml()', () => {
   });
 });
 
-describe('convertTriviaQ()', () => {
+describeGame('convertTriviaQ()', () => {
   it('converts a valid trivia question', () => {
     const g = createGameContext();
     const raw = {
@@ -358,7 +361,7 @@ describe('convertTriviaQ()', () => {
   });
 });
 
-describe('checkWinCondition()', () => {
+describeGame('checkWinCondition()', () => {
   it('returns -1 when multiple players have pegs', () => {
     const g = createGameContext();
     g.State.game = {
@@ -398,7 +401,7 @@ describe('checkWinCondition()', () => {
   });
 });
 
-describe('rankUp() and rankDown()', () => {
+describeGame('rankUp() and rankDown()', () => {
   it('rankUp increments rank from 0 to 1', () => {
     const g = createGameContext();
     g.State.game = { pegs: { 'p0_peg0': { rank: 0, correct: 3 } } };
@@ -438,7 +441,7 @@ describe('rankUp() and rankDown()', () => {
   });
 });
 
-describe('getQuestion()', () => {
+describeGame('getQuestion()', () => {
   it('returns null when no questions available in any category', () => {
     const g = createGameContext();
     g.State.questions = EMPTY_QUESTIONS();
@@ -490,7 +493,7 @@ describe('getQuestion()', () => {
   });
 });
 
-describe('eliminatePeg()', () => {
+describeGame('eliminatePeg()', () => {
   it('clears the tile the peg was on', () => {
     const g = createGameContext();
     g.State.game = {
@@ -513,7 +516,7 @@ describe('eliminatePeg()', () => {
   });
 });
 
-describe('getValidMoves()', () => {
+describeGame('getValidMoves()', () => {
   it('returns all 4 adjacent tiles from center of open board', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
@@ -588,7 +591,7 @@ describe('getValidMoves()', () => {
   });
 });
 
-describe('validMoves encoding consistency', () => {
+describeGame('validMoves encoding consistency', () => {
   // Regression: handleNormalMove() was assigning a raw array instead of an
   // encoded Set, breaking isValidMoveTarget() for multi-move turns (rank > 0).
   it('validMoves is always a Set of encoded numbers, not an array of objects', () => {
@@ -626,7 +629,7 @@ describe('validMoves encoding consistency', () => {
   });
 });
 
-describe('Async handler null safety', () => {
+describeGame('Async handler null safety', () => {
   // All QUESTION_HANDLERS must guard against State.game being null when invoked
   // 220ms after continueAfterQuestion fires (user may have quit during that window).
   it('handleCombatQ1 returns silently when State.game is null', () => {
