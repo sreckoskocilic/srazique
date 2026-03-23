@@ -69,7 +69,8 @@
       "oneClick": false,
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Srazique_Setup.${ext}"
     },
     "dmg": {
       "contents": [
