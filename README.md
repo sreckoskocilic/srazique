@@ -1,8 +1,14 @@
 # Srazique
 
-Strategic board game built with Electron.
-
 ![CI](https://github.com/sreckoskocilic/srazique/actions/workflows/ci.yml/badge.svg)
+
+A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Srazique brings back the original gameplay with updated visuals and multiplayer support, built with Electron.
+
+This project was born out of a deep passion for quiz games and countless hours spent playing the original Sraz with friends — until we had memorized every question and started longing for a fresh set. Rather than just updating the question bank, I decided to rebuild the whole thing from scratch.
+
+This version features 1000+ questions sourced by scraping pub quiz sets, Wikipedia, encyclopedias, and schoolbooks — prioritizing reliability and accuracy over quantity.
+
+> For the best overview of the original 1993 DOS game, see: [Sraz (1993) — prvi domaći kviz znanja na računalu koji je spojio igru i učenje](https://virus.hr/en/sraz-1993-prvi-domaci-kviz-znanja-na-racunalu-koji-je-spojio-igru-i-ucenje/)
 
 ## Features
 
@@ -12,41 +18,16 @@ Strategic board game built with Electron.
 - Combat system with rank progression
 - Flag capture mechanics
 
-## Development
+## Installation
 
-```bash
-# Install dependencies
-npm install
+Download the latest release for your platform from the [Releases](../../releases) page:
 
-# Start development
-npm start
+- **Windows** — download and run `Srazique_Setup.exe`
+- **macOS** — download and open the `.dmg` file, then drag Srazique to your Applications folder
 
-# Run tests
-npm test
+## Contributing
 
-# Lint code
-npm run lint
-
-# Build Windows
-npm run build:win
-
-# Build macOS
-npm run build:mac
-```
-
-## Build Output
-
-- Windows: `dist/Srazique_Setup.exe`
-- macOS: `dist/Srazique-{version}.dmg`
-
-## Releases
-
-Releases are published automatically to [GitHub Releases](../../releases) when a version tag is pushed:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+If you'd like to contribute, feel free to reach out or start a [discussion on GitHub](../../discussions). All ideas are welcome.
 
 ## License
 
