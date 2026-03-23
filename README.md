@@ -2,12 +2,14 @@
 
 Strategic board game built with Electron.
 
+![CI](https://github.com/skocho/srazique/actions/workflows/ci.yml/badge.svg)
+
 ## Features
 
 - 2-4 player local multiplayer
 - 8x8 game board with category-based tiles
 - Trivia questions (10 categories + Croatia/BiH regional)
-- Combat system with rank progression (Kmet → Vojnik → Vitez)
+- Combat system with rank progression
 - Flag capture mechanics
 
 ## Development
@@ -34,9 +36,18 @@ npm run build:mac
 
 ## Build Output
 
-- Windows: `dist/Srazique-Setup-{version}.exe` (version from package.json)
+- Windows: `dist/Srazique_Setup.exe`
 - macOS: `dist/Srazique-{version}.dmg`
+
+## Releases
+
+Releases are published automatically to [GitHub Releases](../../releases) when a version tag is pushed:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ## License
 
-ISC
+MIT

@@ -24,7 +24,7 @@
     "multiplayer"
   ],
   "author": "Srecko Skocilic",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.0",
