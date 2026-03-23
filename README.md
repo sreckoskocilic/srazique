@@ -24,6 +24,8 @@ This version features 1000+ questions sourced by scraping pub quiz sets, Wikiped
 - Combat system with rank progression
 - Flag capture mechanics
 
+> **Note:** This initial version does not include a timer on answers.
+
 ## Installation
 
 Download the latest release for your platform from the [Releases](../../releases) page:
