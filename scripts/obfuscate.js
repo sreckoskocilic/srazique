@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 const JavaScriptObfuscator = require('javascript-obfuscator/dist/index.js');
 
 const cleanHtmlPath = path.join(__dirname, '..', 'tests', 'fixtures', 'index.clean.html');
@@ -37,7 +38,7 @@ const obfuscatedCode = obfuscationResult.getObfuscatedCode();
 
 // Validate the obfuscated output is parseable JS before writing
 try {
-  new Function(obfuscatedCode);
+  vm.compileFunction(obfuscatedCode);
 } catch (e) {
   console.error('Obfuscated output is invalid JavaScript — aborting write:', e.message);
   process.exit(1);

@@ -8,7 +8,7 @@ module.exports = [
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'module',
+      sourceType: 'commonjs',
       globals: {
         console: 'readonly',
         process: 'readonly',
@@ -17,6 +17,16 @@ module.exports = [
         __dirname: 'readonly'
       }
     },
+    plugins: {
+      html
+    },
+    rules: {
+      'no-unused-vars': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }]
+    }
+  },
+  {
+    files: ['tests/fixtures/**/*.html'],
     plugins: {
       html
     },
