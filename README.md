@@ -19,7 +19,7 @@ This version features 1000+ questions sourced by scraping pub quiz sets, Wikiped
 ## Features
 
 - 2-4 player local multiplayer
-- 8x8 game board with category-based tiles
+- 4x4, 8x8, or 10x10 game board with category-based tiles
 - Trivia questions (10 categories + Croatia/BiH regional)
 - Combat system with rank progression
 - Flag capture mechanics
@@ -36,6 +36,44 @@ Download the latest release for your platform from the [Releases](../../releases
 ## Contributing
 
 If you'd like to contribute, feel free to reach out or start a [discussion on GitHub](../../discussions). All ideas are welcome.
+
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) >= 22
+- Git
+
+### Setup
+
+```bash
+git clone --recurse-submodules git@github.com:sreckoskocilic/srazique.git
+cd srazique
+npm install
+```
+
+The test fixtures live in a private submodule at `tests/fixtures/`. If you cloned without `--recurse-submodules`:
+
+```bash
+git submodule update --init --recursive
+```
+
+If you don't have access to the private fixtures repo, generate a stub:
+
+```bash
+npm run fixture:stub
+```
+
+### Commands
+
+```bash
+npm start          # Run the app
+npm test           # Run tests
+npm run lint       # Lint code
+npm run obfuscate  # Obfuscate clean HTML → index.html
+npm run build:mac  # Build macOS DMG
+npm run build:win  # Build Windows installer
+```
 
 ## License
 

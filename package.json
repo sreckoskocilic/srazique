@@ -10,6 +10,7 @@
     "lint:fix": "eslint main.js scripts/ --fix",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "obfuscate": "node scripts/obfuscate.js",
     "fixture:stub": "node scripts/generate-stub-fixture.js",
     "build:mac": "npm run obfuscate && electron-builder --mac",
