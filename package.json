@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "obfuscate": "node scripts/obfuscate.js",
+    "fixture:stub": "node scripts/generate-stub-fixture.js",
     "build:mac": "npm run obfuscate && electron-builder --mac",
     "build:win": "npm run obfuscate && electron-builder --win",
     "build": "npm run obfuscate && electron-builder --mac --win",

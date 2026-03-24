@@ -8,5 +8,4 @@ npm-debug.log*
 Thumbs.db
 .env
 .vscode/
-tests/fixtures/
 *.bak
