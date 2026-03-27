@@ -20,6 +20,12 @@ if (!scriptMatch) {
 }
 
 const originalJs = scriptMatch[1];
+
+if (originalJs.includes('__STUB_FIXTURE__')) {
+  console.error('Stub fixture detected — refusing to obfuscate for production build.');
+  process.exit(1);
+}
+
 process.stdout.write('Obfuscating JavaScript...\n');
 
 const obfuscationResult = JavaScriptObfuscator.obfuscate(originalJs, {
