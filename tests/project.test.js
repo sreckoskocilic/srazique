@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 
@@ -138,16 +138,10 @@ describe('Build Outputs', () => {
     }
   });
 
-  if (distExists) {
-    const contents = fs.readdirSync(path.join(PROJECT_ROOT, 'dist'));
-    
-    if (contents.includes('win-unpacked')) {
-      it('should have Windows unpacked build', () => {
-        const winDir = fs.statSync(path.join(PROJECT_ROOT, 'dist', 'win-unpacked'));
-        expect(winDir.isDirectory()).toBe(true);
-      });
-    }
-  }
+  const distContents = distExists ? fs.readdirSync(path.join(PROJECT_ROOT, 'dist')) : [];
+  it.runIf(distContents.includes('win-unpacked'))('should have Windows unpacked build', () => {
+    expect(fs.statSync(path.join(PROJECT_ROOT, 'dist', 'win-unpacked')).isDirectory()).toBe(true);
+  });
 });
 
 

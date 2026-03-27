@@ -273,14 +273,9 @@ describeGame('Clean HTML Structure', () => {
 // context and verify runtime behavior, not just code presence.
 // ============================================================
 
-const EMPTY_USED_Q = () => {
-  const cats = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
-  return Object.fromEntries(cats.map(c => [c, new Set()]));
-};
-const EMPTY_QUESTIONS = () => {
-  const cats = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
-  return Object.fromEntries(cats.map(c => [c, []]));
-};
+const ALL_CATS = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
+const EMPTY_USED_Q = () => Object.fromEntries(ALL_CATS.map(c => [c, new Set()]));
+const EMPTY_QUESTIONS = () => Object.fromEntries(ALL_CATS.map(c => [c, []]));
 
 describeGame('shuffle()', () => {
   it('returns same length array', () => {
