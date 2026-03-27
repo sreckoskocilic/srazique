@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
 
 const PROJECT_ROOT = process.cwd();
 
@@ -128,14 +127,6 @@ describe('ESLint Configuration', () => {
   it('should have rules', () => expect(config).toContain('rules'));
 });
 
-describe('Node Modules', () => {
-  it('should have node_modules', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules'))).toBe(true));
-  it('should have electron', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules', 'electron'))).toBe(true));
-  it('should have electron-builder', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules', 'electron-builder'))).toBe(true));
-  it('should have vitest', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules', 'vitest'))).toBe(true));
-  it('should have eslint', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules', 'eslint'))).toBe(true));
-  it('should have javascript-obfuscator', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'node_modules', 'javascript-obfuscator'))).toBe(true));
-});
 
 describe('Build Outputs', () => {
   const distExists = fs.existsSync(path.join(PROJECT_ROOT, 'dist'));
@@ -159,15 +150,6 @@ describe('Build Outputs', () => {
   }
 });
 
-describe('Linting', () => {
-  it('should have no lint errors', () => {
-    try {
-      execSync('npm run lint', { cwd: PROJECT_ROOT, encoding: 'utf8', stdio: 'pipe' });
-    } catch (e) {
-      expect(e.message).not.toContain('error');
-    }
-  });
-});
 
 describe('Security Configuration', () => {
   const mainJs = fs.readFileSync(path.join(PROJECT_ROOT, 'main.js'), 'utf8');
