@@ -3,7 +3,8 @@
 ![CI](https://github.com/sreckoskocilic/srazique/actions/workflows/ci.yml/badge.svg)
 ![Release](https://img.shields.io/github/v/release/sreckoskocilic/srazique)
 ![License](https://img.shields.io/github/license/sreckoskocilic/srazique)
-![Issues](https://img.shields.io/github/issues/sreckoskocilic/srazique)
+![Language](https://img.shields.io/github/languages/top/sreckoskocilic/srazique)
+![Code Size](https://img.shields.io/github/languages/code-size/sreckoskocilic/srazique)
 
 A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Srazique brings back the original gameplay with updated visuals and multiplayer support, built with Electron.
 
