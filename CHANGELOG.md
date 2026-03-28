@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2026-03-28
+
+### Changed
+
+- Major refactor of app context, obfuscator and content loading
+
+### Updated
+
+- README documentation
+
 ## [1.0.1] - 2026-03-27
 
 ### Added
