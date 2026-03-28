@@ -109,8 +109,8 @@
       "index.html",
       "main.js",
       "preload.js",
-      "questions.wasm",
-      "wasm_exec.js"
+      "questions.enc",
+      "scripts/decrypt-questions.js"
     ],
     "compression": "maximum",
     "npmRebuild": false

@@ -50,19 +50,6 @@ function saveWindowState(win) {
   } catch {}
 }
 
-if (app.isPackaged) {
-  session.defaultSession.webRequest.onHeadersReceived((d, c) =>
-    c({
-      responseHeaders: {
-        ...d.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'",
-        ],
-      },
-    })
-  );
-}
-
 function createWindow() {
   const ws = loadWindowState();
   const win = new BrowserWindow({
