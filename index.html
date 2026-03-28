@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.socket.io; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://sraz.nbastables.com wss://sraz.nbastables.com;">
 <title>SRAZ — Clash</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -939,6 +939,10 @@ body {
 .timer-btn { flex: 1; padding: 8px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .timer-btn.selected { border-color: var(--primary); background: var(--bg-dark); color: var(--primary); }
 .timer-btn:hover:not(.selected) { background: var(--secondary-hover); }
+.player-count-btns { display: flex; gap: 8px; margin-top: 6px; margin-bottom: 14px; }
+.player-count-btns button { flex: 1; padding: 8px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.player-count-btns button.active { border-color: var(--primary); background: var(--bg-dark); color: var(--primary); }
+.player-count-btns button:hover:not(.active) { background: var(--secondary-hover); }
 .cat-toggle-btns { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
 .cat-toggle-btn { flex: 1 1 calc(20% - 6px); padding: 6px 4px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; text-align: center; letter-spacing: 0.5px; }
 .cat-toggle-btn.active { border-color: var(--primary); background: var(--bg-dark); color: var(--primary); }
@@ -1149,8 +1153,95 @@ body {
 <script>
 'use strict';
 
-// Questions loaded from WASM by main.js
+// Questions loaded by main.js (Electron) or loadQuestionsWeb() (browser)
 window.SRAZ_QUESTIONS = {};
+
+// ---------------------------------------------------------------------------
+// Web multiplayer shim — only created when preload.js hasn't provided the API
+// ---------------------------------------------------------------------------
+if (typeof window.multiplayerAPI === 'undefined') {
+  let _webSocket = null;
+  const _webHandlers = {};
+
+  async function _loadSocketIO() {
+    if (window.io) return;
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.socket.io/4.8.1/socket.io.min.js';
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Failed to load socket.io'));
+      document.head.appendChild(s);
+    });
+  }
+
+  window.multiplayerAPI = {
+    connect: async (url) => {
+      try {
+        await _loadSocketIO();
+        if (_webSocket) { _webSocket.disconnect(); _webSocket = null; }
+        const FORWARDED = [
+          'connect','disconnect','room:player_joined','room:player_left','room:full',
+          'game:start','game:question_start','state:update',
+        ];
+        return new Promise((resolve) => {
+          _webSocket = window.io(url, { transports: ['websocket'] });
+          _webSocket.once('connect', () => {
+            FORWARDED.forEach(evt => {
+              _webSocket.on(evt, data => (_webHandlers[evt] || []).forEach(h => h(data)));
+            });
+            resolve({ ok: true, id: _webSocket.id });
+          });
+          _webSocket.once('connect_error', err => resolve({ error: err.message }));
+          setTimeout(() => resolve({ error: 'Connection timeout' }), 8000);
+        });
+      } catch (e) {
+        return { error: e.message };
+      }
+    },
+    emit: (event, data) => {
+      if (!_webSocket?.connected) return Promise.resolve({ error: 'Not connected' });
+      return new Promise(resolve => _webSocket.emit(event, data, resolve));
+    },
+    on: (event, fn) => {
+      if (!_webHandlers[event]) _webHandlers[event] = [];
+      _webHandlers[event].push(fn);
+    },
+    disconnect: () => {
+      _webSocket?.disconnect();
+      _webSocket = null;
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Web questions loading — fetch + XOR decrypt (mirrors main.js for Electron)
+// ---------------------------------------------------------------------------
+async function loadQuestionsWeb() {
+  // Skip in Electron — main.js handles injection
+  if (typeof window.electronAPI !== 'undefined') return;
+  try {
+    const resp = await fetch('questions.enc');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const b64 = await resp.text();
+
+    const keyStr = 'SraziqueQuestions2024';
+    const keyBytes = new TextEncoder().encode(keyStr);
+    const encrypted = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const decrypted = new Uint8Array(encrypted.length);
+    for (let i = 0; i < encrypted.length; i++) {
+      decrypted[i] = encrypted[i] ^ keyBytes[i % keyBytes.length];
+    }
+
+    window.SRAZ_QUESTIONS = JSON.parse(new TextDecoder().decode(decrypted));
+    const cats = Object.keys(window.SRAZ_QUESTIONS);
+    console.log('Questions loaded from web:', cats.length, 'categories');
+
+    State.questionsLoaded = false;
+    loadQuestions();
+  } catch (e) {
+    console.error('Web questions load failed:', e);
+  }
+}
 
 let _lastAnswerCorrect = false;
 const _movedPegs = new Set();
@@ -2488,6 +2579,7 @@ try {
   renderPlayerInputs();
   setBoardSize(8);
   loadQuestions();
+  loadQuestionsWeb();
 } catch(e) {
   console.error('SRAZ init error:', e);
 }

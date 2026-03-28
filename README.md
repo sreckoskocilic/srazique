@@ -25,10 +25,12 @@ This version features **8,600+ unique questions** across 10 categories, sourced 
 - 2-4 player local multiplayer
 - 4x4, 8x8, or 10x10 game board with category-based tiles
 - Massive trivia bank (10 categories including Art, Geography, History, Science, and more)
-- Combat system with rank progression
+- Combat system with rank progression — higher rank wins regardless of answer
 - Flag capture mechanics
 - Countdown timer per answer (15, 30, or 45 seconds)
 - Keyboard navigation (A/B/C/D or 1/2/3/4 for answers, arrow keys for board)
+- Online multiplayer via dedicated server
+- Runs in a web browser — same engine as the desktop app
 
 ## Installation
 
@@ -36,6 +38,7 @@ Download the latest release for your platform from the [Releases](../../releases
 
 - **Windows** — download and run `Srazique_Setup.exe`
 - **macOS** — download and open the `.dmg` file, then drag Srazique to your Applications folder
+- **Web** — open in any modern browser (questions and multiplayer load automatically)
 
 ## License
 
