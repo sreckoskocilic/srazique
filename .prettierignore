@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+dist/
+
+# Coverage
+coverage/
+
+# Obfuscated
+index.html
+
+# Test fixtures (must preserve exact formatting for tests)
+tests/fixtures/
+
+# Test files
+tests/*.test.js

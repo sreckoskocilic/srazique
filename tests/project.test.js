@@ -5,13 +5,18 @@ import path from 'path';
 const PROJECT_ROOT = process.cwd();
 
 describe('Project Structure', () => {
-  it('should have main.js', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'main.js'))).toBe(true));
-  it('should have index.html', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'index.html'))).toBe(true));
-  it('should have package.json', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'package.json'))).toBe(true));
-  it('should have obfuscate script', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'scripts', 'obfuscate.js'))).toBe(true));
-  it('should have .gitignore', () => expect(fs.existsSync(path.join(PROJECT_ROOT, '.gitignore'))).toBe(true));
-  it('should have eslint config', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'eslint.config.js'))).toBe(true));
-  it('should have LICENSE', () => expect(fs.existsSync(path.join(PROJECT_ROOT, 'LICENSE'))).toBe(true));
+  it('should have main.js', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, 'main.js'))).toBe(true));
+  it('should have index.html', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, 'index.html'))).toBe(true));
+  it('should have package.json', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, 'package.json'))).toBe(true));
+  it('should have .gitignore', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, '.gitignore'))).toBe(true));
+  it('should have eslint config', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, 'eslint.config.js'))).toBe(true));
+  it('should have LICENSE', () =>
+    expect(fs.existsSync(path.join(PROJECT_ROOT, 'LICENSE'))).toBe(true));
 });
 
 describe('package.json Validation', () => {
@@ -23,9 +28,10 @@ describe('package.json Validation', () => {
   it('should have build script', () => expect(pkg.scripts.build).toBeDefined());
   it('should have lint script', () => expect(pkg.scripts.lint).toBeDefined());
   it('should have test script', () => expect(pkg.scripts.test).toBeDefined());
-  it('should have obfuscate script', () => expect(pkg.scripts.obfuscate).toBeDefined());
-  it('should have electron in devDependencies', () => expect(pkg.devDependencies.electron).toBeDefined());
-  it('should have electron-builder', () => expect(pkg.devDependencies['electron-builder']).toBeDefined());
+  it('should have electron in devDependencies', () =>
+    expect(pkg.devDependencies.electron).toBeDefined());
+  it('should have electron-builder', () =>
+    expect(pkg.devDependencies['electron-builder']).toBeDefined());
   it('should have eslint', () => expect(pkg.devDependencies.eslint).toBeDefined());
   it('should have vitest', () => expect(pkg.devDependencies.vitest).toBeDefined());
   it('should have appId in build config', () => expect(pkg.build.appId).toBe('com.srazique.game'));
@@ -87,23 +93,6 @@ describe('CSS Structure', () => {
   it('should have category colors', () => expect(html).toContain('cat-'));
 });
 
-describe('Obfuscate Script', () => {
-  const content = fs.readFileSync(path.join(PROJECT_ROOT, 'scripts', 'obfuscate.js'), 'utf8');
-
-  it('should require fs', () => expect(content).toContain("require('fs')"));
-  it('should require path', () => expect(content).toContain("require('path')"));
-  it('should require javascript-obfuscator', () => expect(content).toContain('javascript-obfuscator'));
-  it('should reference index.html', () => expect(content).toContain('index.html'));
-  it('should use fs.readFileSync', () => expect(content).toContain('readFileSync'));
-  it('should use fs.writeFileSync', () => expect(content).toContain('writeFileSync'));
-  it('should use JavaScriptObfuscator.obfuscate', () => expect(content).toContain('obfuscate'));
-  it('should have compact option', () => expect(content).toContain('compact: true'));
-  it('should have renameVariables option', () => expect(content).toContain('renameVariables'));
-  it('should handle script not found error', () => expect(content).toContain('No script found'));
-  it('should exit on error', () => expect(content).toContain('process.exit(1)'));
-  it('should log progress', () => expect(content).toContain('process.stdout.write'));
-});
-
 describe('Git Configuration', () => {
   const gitignore = fs.readFileSync(path.join(PROJECT_ROOT, '.gitignore'), 'utf8');
 
@@ -127,7 +116,6 @@ describe('ESLint Configuration', () => {
   it('should have rules', () => expect(config).toContain('rules'));
 });
 
-
 describe('Build Outputs', () => {
   const distExists = fs.existsSync(path.join(PROJECT_ROOT, 'dist'));
 
@@ -143,7 +131,6 @@ describe('Build Outputs', () => {
     expect(fs.statSync(path.join(PROJECT_ROOT, 'dist', 'win-unpacked')).isDirectory()).toBe(true);
   });
 });
-
 
 describe('Security Configuration', () => {
   const mainJs = fs.readFileSync(path.join(PROJECT_ROOT, 'main.js'), 'utf8');
@@ -190,25 +177,34 @@ describe('Clean HTML Constants', () => {
     it('should have Q_API_TIMEOUT_MS constant', () => expect(code).toContain('Q_API_TIMEOUT_MS'));
     it('should have Q_API_DELAY_MS constant', () => expect(code).toContain('Q_API_DELAY_MS'));
     it('should have COORD_BASE constant', () => expect(code).toContain('COORD_BASE'));
-    it('should not use bare 8000ms timeout literal', () => expect(code).not.toContain('AbortSignal.timeout(8000)'));
-    it('should not use bare 250ms delay literal', () => expect(code).not.toContain('setTimeout(r, 250)'));
-    it('should use try/finally in fetchQuestionsBackground', () => expect(code).toContain('} finally {'));
-    it('should guard updateTileDOM against null game', () => expect(code).toContain("function updateTileDOM") && expect(code).toContain('if (!State.game) return;'));
-    it('should guard flushUpdates against null game', () => expect(code).toContain('function flushUpdates'));
-    it('should have bounds check in movePegTo', () => expect(code).toContain('r < 0 || r >= S || c < 0 || c >= S'));
+    it('should not use bare 8000ms timeout literal', () =>
+      expect(code).not.toContain('AbortSignal.timeout(8000)'));
+    it('should not use bare 250ms delay literal', () =>
+      expect(code).not.toContain('setTimeout(r, 250)'));
+    it('should use try/finally in fetchQuestionsBackground', () =>
+      expect(code).toContain('} finally {'));
+    it('should guard updateTileDOM against null game', () =>
+      expect(code).toContain('function updateTileDOM') &&
+      expect(code).toContain('if (!State.game) return;'));
+    it('should guard flushUpdates against null game', () =>
+      expect(code).toContain('function flushUpdates'));
+    it('should have bounds check in movePegTo', () =>
+      expect(code).toContain('r < 0 || r >= S || c < 0 || c >= S'));
     it('should use dataset.size in setBoardSize', () => expect(code).toContain('btn.dataset.size'));
-    it('should reset dirty flags in resetGame', () => expect(code).toContain('State.dirty.board = false'));
+    it('should reset dirty flags in resetGame', () =>
+      expect(code).toContain('State.dirty.board = false'));
     it('should encode validMoves consistently in handleNormalMove', () =>
-      expect(code).toContain('new Set(getValidMoves(State.game.selectedPegId).map(({r,c}) => r * COORD_BASE + c))'));
+      expect(code).toContain(
+        'new Set(getValidMoves(State.game.selectedPegId).map(({r,c}) => r * COORD_BASE + c))'
+      ));
     it('should guard handleCombatQ1 against null State.game', () =>
-      expect(code).toContain('function handleCombatQ1') && expect(code).toContain('if (!State.game) return;'));
+      expect(code).toContain('function handleCombatQ1') &&
+      expect(code).toContain('if (!State.game) return;'));
     it('should guard checkEndGame setTimeout against null State.game', () =>
       expect(code).toContain('if (State.game) showGameOver(winner)'));
     it('should guard finishBattle against null State.game', () =>
       expect(code).toContain('function finishBattle'));
-    it('should guard flushUIUpdates peg access', () =>
-      expect(code).toContain('if (peg) {'));
-    it('should guard updateTileDOM peg lookup', () =>
-      expect(code).toContain('if (!peg) return;'));
+    it('should guard flushUIUpdates peg access', () => expect(code).toContain('if (peg) {'));
+    it('should guard updateTileDOM peg lookup', () => expect(code).toContain('if (!peg) return;'));
   }
 });

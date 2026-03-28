@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import vm from 'vm';
+import { VM } from 'vm2';
 
 const PROJECT_ROOT = process.cwd();
 const CLEAN_HTML_PATH = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html');
@@ -13,7 +13,7 @@ const GAME_CODE = SCRIPT_MATCH ? SCRIPT_MATCH[1] : '';
 const describeGame = CLEAN_HTML ? describe : describe.skip;
 
 // Creates an isolated game context and returns the exported functions/state.
-// Uses an IIFE wrapper so const/let declarations from GAME_CODE are accessible.
+// Uses vm2 for ES6 support (arrow functions, const/let, template literals)
 function createGameContext() {
   const mockElement = () => ({
     querySelectorAll: () => [],
@@ -25,6 +25,7 @@ function createGameContext() {
     onclick: null,
     dataset: {},
     offsetWidth: 0,
+    getBoundingClientRect: () => ({ left: 0, top: 0, bottom: 0, right: 0 }),
   });
 
   const sandbox = {
@@ -32,37 +33,49 @@ function createGameContext() {
       getElementById: () => mockElement(),
       createElement: () => mockElement(),
       addEventListener: () => {},
+      removeEventListener: () => {},
+      querySelectorAll: () => [],
+      querySelector: () => null,
       documentElement: { style: { setProperty: () => {} } },
     },
     localStorage: { getItem: () => null, setItem: () => {} },
-    requestAnimationFrame: () => {},
-    setTimeout: () => 0,
+    requestAnimationFrame: (fn) => setTimeout(fn, 16),
+    setTimeout: (fn) => fn(),
     clearTimeout: () => {},
     console: { warn: () => {}, error: () => {}, log: () => {} },
     fetch: () => Promise.resolve({ ok: false }),
     AbortSignal: { timeout: () => ({}) },
+    window: {},
+    navigator: {},
+    body: mockElement(),
   };
 
-  vm.createContext(sandbox);
+  const vm2 = new VM({
+    sandbox: sandbox,
+    eval: false,
+    wasm: false,
+  });
 
-  const wrappedCode = `(function() {
-    ${GAME_CODE}
-    return {
-      State, PHASE, CATS, RANK_UP_THRESHOLD, PLAYER_COLORS, COORD_BASE,
-      shuffle, cleanHtml, convertTriviaQ,
-      checkWinCondition, rankUp, rankDown,
-      getQuestion, getValidMoves, eliminatePeg, movePegTo,
-      getAdjacentTiles, randomCat,
-      handleCombatQ1, handleCombatQ2, handleNormalMove, handleFlagQ, finishBattle,
-    };
-  })()`;
+  const wrappedCode = `
+    (function() {
+      ${GAME_CODE}
+      return {
+        State, PHASE, CATS, RANK_UP_THRESHOLD, PLAYER_COLORS, COORD_BASE,
+        shuffle, cleanHtml, convertTriviaQ,
+        checkWinCondition, rankUp, rankDown,
+        getQuestion, getValidMoves, eliminatePeg, movePegTo,
+        getAdjacentTiles, randomCat,
+        handleCombatQ1, handleCombatQ2, handleNormalMove, handleFlagQ, finishBattle,
+      };
+    })()
+  `;
 
-  return vm.runInContext(wrappedCode, sandbox);
+  return vm2.run(wrappedCode);
 }
 
 describeGame('Game Constants', () => {
   it('should have PLAYER_COLORS with 4 colors', () => {
-    expect(GAME_CODE).toContain("const PLAYER_COLORS");
+    expect(GAME_CODE).toContain('const PLAYER_COLORS');
     expect(GAME_CODE).toContain("'#E53935'");
     expect(GAME_CODE).toContain("'#1E88E5'");
     expect(GAME_CODE).toContain("'#43A047'");
@@ -122,11 +135,11 @@ describeGame('Game Constants', () => {
   });
 
   it('should have DIRS for movement directions', () => {
-    expect(GAME_CODE).toContain("[[-1,0],[1,0],[0,-1],[0,1]]");
+    expect(GAME_CODE).toContain('[[-1,0],[1,0],[0,-1],[0,1]]');
   });
 
   it('should have RANK_UP_THRESHOLD', () => {
-    expect(GAME_CODE).toContain("RANK_UP_THRESHOLD = 5");
+    expect(GAME_CODE).toContain('RANK_UP_THRESHOLD = 5');
   });
 
   it('should have CAT_NAMES mapping', () => {
@@ -138,114 +151,150 @@ describeGame('Game Constants', () => {
 
 describeGame('State Object', () => {
   it('should have State object', () => {
-    expect(GAME_CODE).toContain("const State = {");
+    expect(GAME_CODE).toContain('const State = {');
   });
 
   it('should have setup property', () => {
-    expect(GAME_CODE).toContain("setup: {");
-    expect(GAME_CODE).toContain("playerCount: 2");
-    expect(GAME_CODE).toContain("boardSize: 8");
+    expect(GAME_CODE).toContain('setup: {');
+    expect(GAME_CODE).toContain('playerCount: 2');
+    expect(GAME_CODE).toContain('boardSize: 8');
   });
 
   it('should have game property', () => {
-    expect(GAME_CODE).toContain("game: null");
+    expect(GAME_CODE).toContain('game: null');
   });
 
   it('should have questions property', () => {
-    expect(GAME_CODE).toContain("questions: {}");
+    expect(GAME_CODE).toContain('questions: {}');
   });
 
   it('should have questionsLoaded property', () => {
-    expect(GAME_CODE).toContain("questionsLoaded: false");
+    expect(GAME_CODE).toContain('questionsLoaded: false');
   });
 
   it('should have DOM property', () => {
-    expect(GAME_CODE).toContain("DOM: {");
-    expect(GAME_CODE).toContain("board: null");
-    expect(GAME_CODE).toContain("tiles: []");
-    expect(GAME_CODE).toContain("pegs: new Map()");
+    expect(GAME_CODE).toContain('DOM: {');
+    expect(GAME_CODE).toContain('board: null');
+    expect(GAME_CODE).toContain('tiles: []');
+    expect(GAME_CODE).toContain('pegs: new Map()');
   });
 });
 
 describeGame('Game Functions', () => {
   it('should have randomCat function', () => expect(GAME_CODE).toContain('function randomCat'));
   it('should have tileCat function', () => expect(GAME_CODE).toContain('function tileCat'));
-  it('should have generateLayoutMap function', () => expect(GAME_CODE).toContain('function generateLayoutMap'));
-  it('should have getCornerOwner function', () => expect(GAME_CODE).toContain('function getCornerOwner'));
-  it('should have getStartPositions function', () => expect(GAME_CODE).toContain('function getStartPositions'));
+  it('should have generateLayoutMap function', () =>
+    expect(GAME_CODE).toContain('function generateLayoutMap'));
+  it('should have getCornerOwner function', () =>
+    expect(GAME_CODE).toContain('function getCornerOwner'));
+  it('should have getStartPositions function', () =>
+    expect(GAME_CODE).toContain('function getStartPositions'));
   it('should have shuffle function', () => expect(GAME_CODE).toContain('function shuffle'));
   it('should have loadQCache function', () => expect(GAME_CODE).toContain('function loadQCache'));
   it('should have saveQCache function', () => expect(GAME_CODE).toContain('function saveQCache'));
-  it('should have loadQuestions function', () => expect(GAME_CODE).toContain('function loadQuestions'));
+  it('should have loadQuestions function', () =>
+    expect(GAME_CODE).toContain('function loadQuestions'));
   it('should have qBankTotal function', () => expect(GAME_CODE).toContain('function qBankTotal'));
-  it('should have updateQBankDisplay function', () => expect(GAME_CODE).toContain('function updateQBankDisplay'));
+  it('should have updateQBankDisplay function', () =>
+    expect(GAME_CODE).toContain('function updateQBankDisplay'));
   it('should have cleanHtml function', () => expect(GAME_CODE).toContain('function cleanHtml'));
-  it('should have convertTriviaQ function', () => expect(GAME_CODE).toContain('function convertTriviaQ'));
-  it('should have debouncedFetch function', () => expect(GAME_CODE).toContain('function debouncedFetch'));
-  it('should have setPlayerCount function', () => expect(GAME_CODE).toContain('function setPlayerCount'));
-  it('should have setBoardSize function', () => expect(GAME_CODE).toContain('function setBoardSize'));
-  it('should have renderPlayerInputs function', () => expect(GAME_CODE).toContain('function renderPlayerInputs'));
+  it('should have convertTriviaQ function', () =>
+    expect(GAME_CODE).toContain('function convertTriviaQ'));
+  it('should have debouncedFetch function', () =>
+    expect(GAME_CODE).toContain('function debouncedFetch'));
+  it('should have setPlayerCount function', () =>
+    expect(GAME_CODE).toContain('function setPlayerCount'));
+  it('should have setBoardSize function', () =>
+    expect(GAME_CODE).toContain('function setBoardSize'));
+  it('should have renderPlayerInputs function', () =>
+    expect(GAME_CODE).toContain('function renderPlayerInputs'));
   it('should have startGame function', () => expect(GAME_CODE).toContain('function startGame'));
   it('should have initGame function', () => expect(GAME_CODE).toContain('function initGame'));
-  it('should have currentPlayer function', () => expect(GAME_CODE).toContain('function currentPlayer'));
-  it('should have getAdjacentTiles function', () => expect(GAME_CODE).toContain('function getAdjacentTiles'));
-  it('should have getEligiblePegs function', () => expect(GAME_CODE).toContain('function getEligiblePegs'));
-  it('should have getValidMoves function', () => expect(GAME_CODE).toContain('function getValidMoves'));
+  it('should have currentPlayer function', () =>
+    expect(GAME_CODE).toContain('function currentPlayer'));
+  it('should have getAdjacentTiles function', () =>
+    expect(GAME_CODE).toContain('function getAdjacentTiles'));
+  it('should have getEligiblePegs function', () =>
+    expect(GAME_CODE).toContain('function getEligiblePegs'));
+  it('should have getValidMoves function', () =>
+    expect(GAME_CODE).toContain('function getValidMoves'));
   it('should have getQuestion function', () => expect(GAME_CODE).toContain('function getQuestion'));
   it('should have rankUp function', () => expect(GAME_CODE).toContain('function rankUp'));
   it('should have rankDown function', () => expect(GAME_CODE).toContain('function rankDown'));
-  it('should have eliminatePeg function', () => expect(GAME_CODE).toContain('function eliminatePeg'));
+  it('should have eliminatePeg function', () =>
+    expect(GAME_CODE).toContain('function eliminatePeg'));
   it('should have movePegTo function', () => expect(GAME_CODE).toContain('function movePegTo'));
   it('should have pushPegAway function', () => expect(GAME_CODE).toContain('function pushPegAway'));
-  it('should have checkWinCondition function', () => expect(GAME_CODE).toContain('function checkWinCondition'));
+  it('should have checkWinCondition function', () =>
+    expect(GAME_CODE).toContain('function checkWinCondition'));
   it('should have advanceTurn function', () => expect(GAME_CODE).toContain('function advanceTurn'));
   it('should have selectPeg function', () => expect(GAME_CODE).toContain('function selectPeg'));
   it('should have onPegClick function', () => expect(GAME_CODE).toContain('function onPegClick'));
   it('should have onTileClick function', () => expect(GAME_CODE).toContain('function onTileClick'));
-  it('should have showQuestion function', () => expect(GAME_CODE).toContain('function showQuestion'));
+  it('should have showQuestion function', () =>
+    expect(GAME_CODE).toContain('function showQuestion'));
   it('should have onAnswer function', () => expect(GAME_CODE).toContain('function onAnswer'));
-  it('should have continueAfterQuestion function', () => expect(GAME_CODE).toContain('function continueAfterQuestion'));
-  it('should have handleNormalMove function', () => expect(GAME_CODE).toContain('function handleNormalMove'));
+  it('should have continueAfterQuestion function', () =>
+    expect(GAME_CODE).toContain('function continueAfterQuestion'));
+  it('should have handleNormalMove function', () =>
+    expect(GAME_CODE).toContain('function handleNormalMove'));
   it('should have handleFlagQ function', () => expect(GAME_CODE).toContain('function handleFlagQ'));
-  it('should have handleCombatQ1 function', () => expect(GAME_CODE).toContain('function handleCombatQ1'));
-  it('should have handleCombatQ2 function', () => expect(GAME_CODE).toContain('function handleCombatQ2'));
-  it('should have finishBattle function', () => expect(GAME_CODE).toContain('function finishBattle'));
-  it('should have finishPegMove function', () => expect(GAME_CODE).toContain('function finishPegMove'));
-  it('should have checkEndGame function', () => expect(GAME_CODE).toContain('function checkEndGame'));
-  it('should have showGameOver function', () => expect(GAME_CODE).toContain('function showGameOver'));
+  it('should have handleCombatQ1 function', () =>
+    expect(GAME_CODE).toContain('function handleCombatQ1'));
+  it('should have handleCombatQ2 function', () =>
+    expect(GAME_CODE).toContain('function handleCombatQ2'));
+  it('should have finishBattle function', () =>
+    expect(GAME_CODE).toContain('function finishBattle'));
+  it('should have finishPegMove function', () =>
+    expect(GAME_CODE).toContain('function finishPegMove'));
+  it('should have checkEndGame function', () =>
+    expect(GAME_CODE).toContain('function checkEndGame'));
+  it('should have showGameOver function', () =>
+    expect(GAME_CODE).toContain('function showGameOver'));
   it('should have quitGame function', () => expect(GAME_CODE).toContain('function quitGame'));
   it('should have resetGame function', () => expect(GAME_CODE).toContain('function resetGame'));
   it('should have markUIDirty function', () => expect(GAME_CODE).toContain('function markUIDirty'));
-  it('should have scheduleFlush function', () => expect(GAME_CODE).toContain('function scheduleFlush'));
-  it('should have flushUpdates function', () => expect(GAME_CODE).toContain('function flushUpdates'));
-  it('should have buildBoardDOM function', () => expect(GAME_CODE).toContain('function buildBoardDOM'));
-  it('should have tileBaseClass function', () => expect(GAME_CODE).toContain('function tileBaseClass'));
-  it('should have isValidMoveTarget function', () => expect(GAME_CODE).toContain('function isValidMoveTarget'));
-  it('should have updateTileDOM function', () => expect(GAME_CODE).toContain('function updateTileDOM'));
-  it('should have flushUIUpdates function', () => expect(GAME_CODE).toContain('function flushUIUpdates'));
-  it('should have markAllTilesDirty function', () => expect(GAME_CODE).toContain('function markAllTilesDirty'));
+  it('should have scheduleFlush function', () =>
+    expect(GAME_CODE).toContain('function scheduleFlush'));
+  it('should have flushUpdates function', () =>
+    expect(GAME_CODE).toContain('function flushUpdates'));
+  it('should have buildBoardDOM function', () =>
+    expect(GAME_CODE).toContain('function buildBoardDOM'));
+  it('should have tileBaseClass function', () =>
+    expect(GAME_CODE).toContain('function tileBaseClass'));
+  it('should have isValidMoveTarget function', () =>
+    expect(GAME_CODE).toContain('function isValidMoveTarget'));
+  it('should have updateTileDOM function', () =>
+    expect(GAME_CODE).toContain('function updateTileDOM'));
+  it('should have flushUIUpdates function', () =>
+    expect(GAME_CODE).toContain('function flushUIUpdates'));
+  it('should have markAllTilesDirty function', () =>
+    expect(GAME_CODE).toContain('function markAllTilesDirty'));
   it('should have renderAll function', () => expect(GAME_CODE).toContain('function renderAll'));
 });
 
 describeGame('Question Data', () => {
   it('should have BUILTIN_Q constant', () => expect(GAME_CODE).toContain('const BUILTIN_Q'));
   it('should have HRBA_Q constant', () => expect(GAME_CODE).toContain('const HRBA_Q'));
-  it('should have art questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("art: ["));
-  it('should have geography questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("geography: ["));
-  it('should have history questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("history: ["));
-  it('should have science questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("science: ["));
-  it('should have sport questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("sport: ["));
-  it('should have religion questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("religion: ["));
-  it('should have general questions in BUILTIN_Q', () => expect(GAME_CODE).toContain("general: ["));
+  it('should have art questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('art: ['));
+  it('should have geography questions in BUILTIN_Q', () =>
+    expect(GAME_CODE).toContain('geography: ['));
+  it('should have history questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('history: ['));
+  it('should have science questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('science: ['));
+  it('should have sport questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('sport: ['));
+  it('should have religion questions in BUILTIN_Q', () =>
+    expect(GAME_CODE).toContain('religion: ['));
+  it('should have general questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('general: ['));
 });
 
 describeGame('Global Event Handlers', () => {
-  it('should have keydown handler', () => expect(GAME_CODE).toContain("document.addEventListener('keydown'"));
+  it('should have keydown handler', () =>
+    expect(GAME_CODE).toContain("document.addEventListener('keydown'"));
 });
 
 describeGame('Setup and Initialization', () => {
-  it('should have State.DOM.board', () => expect(GAME_CODE).toContain("State.DOM.board"));
-  it('should set board style', () => expect(GAME_CODE).toContain("board.style.setProperty"));
+  it('should have State.DOM.board', () => expect(GAME_CODE).toContain('State.DOM.board'));
+  it('should set board style', () => expect(GAME_CODE).toContain('board.style.setProperty'));
 });
 
 describeGame('Clean HTML Structure', () => {
@@ -273,9 +322,20 @@ describeGame('Clean HTML Structure', () => {
 // context and verify runtime behavior, not just code presence.
 // ============================================================
 
-const ALL_CATS = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
-const EMPTY_USED_Q = () => Object.fromEntries(ALL_CATS.map(c => [c, new Set()]));
-const EMPTY_QUESTIONS = () => Object.fromEntries(ALL_CATS.map(c => [c, []]));
+const ALL_CATS = [
+  'art',
+  'geography',
+  'history',
+  'literature',
+  'science',
+  'business',
+  'sport',
+  'religion',
+  'entertainment',
+  'general',
+];
+const EMPTY_USED_Q = () => Object.fromEntries(ALL_CATS.map((c) => [c, new Set()]));
+const EMPTY_QUESTIONS = () => Object.fromEntries(ALL_CATS.map((c) => [c, []]));
 
 describeGame('shuffle()', () => {
   it('returns same length array', () => {
@@ -336,7 +396,9 @@ describeGame('convertTriviaQ()', () => {
     const g = createGameContext();
     expect(g.convertTriviaQ(null)).toBeNull();
     expect(g.convertTriviaQ({})).toBeNull();
-    expect(g.convertTriviaQ({ question: {}, correctAnswer: 'A', incorrectAnswers: ['B','C','D'] })).toBeNull();
+    expect(
+      g.convertTriviaQ({ question: {}, correctAnswer: 'A', incorrectAnswers: ['B', 'C', 'D'] })
+    ).toBeNull();
   });
   it('returns null when fewer than 3 incorrect answers', () => {
     const g = createGameContext();
@@ -360,14 +422,20 @@ describeGame('checkWinCondition()', () => {
   it('returns -1 when multiple players have pegs', () => {
     const g = createGameContext();
     g.State.game = {
-      players: [{ id: 0, pegIds: ['p0_peg0'] }, { id: 1, pegIds: ['p1_peg0'] }],
+      players: [
+        { id: 0, pegIds: ['p0_peg0'] },
+        { id: 1, pegIds: ['p1_peg0'] },
+      ],
     };
     expect(g.checkWinCondition()).toBe(-1);
   });
   it('returns survivor id when only one player has pegs', () => {
     const g = createGameContext();
     g.State.game = {
-      players: [{ id: 0, pegIds: [] }, { id: 1, pegIds: ['p1_peg0'] }],
+      players: [
+        { id: 0, pegIds: [] },
+        { id: 1, pegIds: ['p1_peg0'] },
+      ],
     };
     expect(g.checkWinCondition()).toBe(1);
   });
@@ -399,38 +467,38 @@ describeGame('checkWinCondition()', () => {
 describeGame('rankUp() and rankDown()', () => {
   it('rankUp increments rank from 0 to 1', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 0, correct: 3 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 0, correct: 3 } } };
     g.rankUp('p0_peg0');
     expect(g.State.game.pegs['p0_peg0'].rank).toBe(1);
     expect(g.State.game.pegs['p0_peg0'].correct).toBe(0);
   });
   it('rankUp increments rank from 1 to 2 (max)', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 1, correct: 5 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 1, correct: 5 } } };
     g.rankUp('p0_peg0');
     expect(g.State.game.pegs['p0_peg0'].rank).toBe(2);
   });
   it('rankUp does not exceed max rank of 2', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 2, correct: 3 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 2, correct: 3 } } };
     g.rankUp('p0_peg0');
     expect(g.State.game.pegs['p0_peg0'].rank).toBe(2);
   });
   it('rankDown decrements rank and resets correct count', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 2, correct: 1 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 2, correct: 1 } } };
     g.rankDown('p0_peg0');
     expect(g.State.game.pegs['p0_peg0'].rank).toBe(1);
     expect(g.State.game.pegs['p0_peg0'].correct).toBe(0);
   });
   it('rankDown returns false (survived) when rank > 0', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 1, correct: 2 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 1, correct: 2 } } };
     expect(g.rankDown('p0_peg0')).toBe(false);
   });
   it('rankDown returns true (eliminated) when rank is 0', () => {
     const g = createGameContext();
-    g.State.game = { pegs: { 'p0_peg0': { rank: 0, correct: 1 } } };
+    g.State.game = { pegs: { p0_peg0: { rank: 0, correct: 1 } } };
     expect(g.rankDown('p0_peg0')).toBe(true);
     expect(g.State.game.pegs['p0_peg0'].rank).toBe(0);
   });
@@ -445,7 +513,7 @@ describeGame('getQuestion()', () => {
   });
   it('returns a question with correct category tag', () => {
     const g = createGameContext();
-    const q = { q: 'What is art?', opts: ['A','B','C','D'], a: 0 };
+    const q = { q: 'What is art?', opts: ['A', 'B', 'C', 'D'], a: 0 };
     g.State.questions = { ...EMPTY_QUESTIONS(), art: [q] };
     g.State.game = { usedQ: EMPTY_USED_Q() };
     const result = g.getQuestion('art');
@@ -455,7 +523,7 @@ describeGame('getQuestion()', () => {
   });
   it('marks the returned question as used', () => {
     const g = createGameContext();
-    const q = { q: 'Q?', opts: ['A','B','C','D'], a: 0 };
+    const q = { q: 'Q?', opts: ['A', 'B', 'C', 'D'], a: 0 };
     g.State.questions = { ...EMPTY_QUESTIONS(), art: [q] };
     const usedArt = new Set();
     g.State.game = { usedQ: { ...EMPTY_USED_Q(), art: usedArt } };
@@ -464,7 +532,10 @@ describeGame('getQuestion()', () => {
   });
   it('clears used set and continues when all questions exhausted', () => {
     const g = createGameContext();
-    const qs = [{ q: 'Q1?', opts: ['A','B','C','D'], a: 0 }, { q: 'Q2?', opts: ['A','B','C','D'], a: 1 }];
+    const qs = [
+      { q: 'Q1?', opts: ['A', 'B', 'C', 'D'], a: 0 },
+      { q: 'Q2?', opts: ['A', 'B', 'C', 'D'], a: 1 },
+    ];
     g.State.questions = { ...EMPTY_QUESTIONS(), art: qs };
     g.State.game = { usedQ: { ...EMPTY_USED_Q(), art: new Set([0, 1]) } };
     const result = g.getQuestion('art');
@@ -472,7 +543,7 @@ describeGame('getQuestion()', () => {
   });
   it('falls back deterministically when requested category is empty', () => {
     const g = createGameContext();
-    const q = { q: 'A geography Q?', opts: ['A','B','C','D'], a: 0 };
+    const q = { q: 'A geography Q?', opts: ['A', 'B', 'C', 'D'], a: 0 };
     // Only geography has questions; art is empty — fallback must find geography
     g.State.questions = { ...EMPTY_QUESTIONS(), geography: [q] };
     g.State.game = { usedQ: EMPTY_USED_Q() };
@@ -492,8 +563,11 @@ describeGame('eliminatePeg()', () => {
   it('clears the tile the peg was on', () => {
     const g = createGameContext();
     g.State.game = {
-      pegs: { 'p0_peg0': { row: 1, col: 2, playerId: 0 } },
-      board: [[{},{},{},{}],[{},{},{ pegId: 'p0_peg0' },{}]],
+      pegs: { p0_peg0: { row: 1, col: 2, playerId: 0 } },
+      board: [
+        [{}, {}, {}, {}],
+        [{}, {}, { pegId: 'p0_peg0' }, {}],
+      ],
       players: [{ id: 0, pegIds: ['p0_peg0'] }],
     };
     g.eliminatePeg('p0_peg0');
@@ -502,7 +576,7 @@ describeGame('eliminatePeg()', () => {
   it('removes peg from player pegIds list', () => {
     const g = createGameContext();
     g.State.game = {
-      pegs: { 'p0_peg0': { row: 0, col: 0, playerId: 0 } },
+      pegs: { p0_peg0: { row: 0, col: 0, playerId: 0 } },
       board: [[{ pegId: 'p0_peg0' }]],
       players: [{ id: 0, pegIds: ['p0_peg0', 'p0_peg1'] }],
     };
@@ -522,7 +596,7 @@ describeGame('getValidMoves()', () => {
         [emptyTile(), emptyTile(), emptyTile()],
         [emptyTile(), emptyTile(), emptyTile()],
       ],
-      pegs: { 'p0_peg0': { row: 1, col: 1, playerId: 0 } },
+      pegs: { p0_peg0: { row: 1, col: 1, playerId: 0 } },
     };
     g.State.game.board[1][1].pegId = 'p0_peg0';
     const moves = g.getValidMoves('p0_peg0');
@@ -538,7 +612,7 @@ describeGame('getValidMoves()', () => {
         [emptyTile(), emptyTile(), emptyTile()],
         [emptyTile(), emptyTile(), emptyTile()],
       ],
-      pegs: { 'p0_peg0': { row: 0, col: 0, playerId: 0 } },
+      pegs: { p0_peg0: { row: 0, col: 0, playerId: 0 } },
     };
     g.State.game.board[0][0].pegId = 'p0_peg0';
     const moves = g.getValidMoves('p0_peg0');
@@ -555,8 +629,8 @@ describeGame('getValidMoves()', () => {
         [emptyTile(), emptyTile(), emptyTile()],
       ],
       pegs: {
-        'p0_peg0': { row: 1, col: 1, playerId: 0 },
-        'p0_peg1': { row: 0, col: 1, playerId: 0 },
+        p0_peg0: { row: 1, col: 1, playerId: 0 },
+        p0_peg1: { row: 0, col: 1, playerId: 0 },
       },
     };
     g.State.game.board[1][1].pegId = 'p0_peg0';
@@ -575,8 +649,8 @@ describeGame('getValidMoves()', () => {
         [emptyTile(), emptyTile(), emptyTile()],
       ],
       pegs: {
-        'p0_peg0': { row: 1, col: 1, playerId: 0 },
-        'p1_peg0': { row: 0, col: 1, playerId: 1 },
+        p0_peg0: { row: 1, col: 1, playerId: 0 },
+        p1_peg0: { row: 0, col: 1, playerId: 1 },
       },
     };
     g.State.game.board[1][1].pegId = 'p0_peg0';
@@ -599,7 +673,7 @@ describeGame('validMoves encoding consistency', () => {
         [emptyTile(), emptyTile(), emptyTile()],
         [emptyTile(), emptyTile(), emptyTile()],
       ],
-      pegs: { 'p0_peg0': { row: 1, col: 1, playerId: 0 } },
+      pegs: { p0_peg0: { row: 1, col: 1, playerId: 0 } },
       validMoves: new Set(),
       selectedPegId: 'p0_peg0',
       movesRemaining: 1,
@@ -609,7 +683,7 @@ describeGame('validMoves encoding consistency', () => {
 
     // Simulate what handleNormalMove does when movesRemaining > 0
     const raw = g.getValidMoves('p0_peg0');
-    g.State.game.validMoves = new Set(raw.map(({r, c}) => r * g.COORD_BASE + c));
+    g.State.game.validMoves = new Set(raw.map(({ r, c }) => r * g.COORD_BASE + c));
 
     // validMoves must be a Set (not an array)
     expect(g.State.game.validMoves instanceof Set).toBe(true);

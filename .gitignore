@@ -1,11 +1,43 @@
-.idea/
+# Dependencies
 node_modules/
+
+# Build outputs
 dist/
+*.egg-info/
+
+# Test coverage
 coverage/
+
+# Logs
 *.log
 npm-debug.log*
+yarn-error.log*
+
+# OS files
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+
+# Environment
 .env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
 .vscode/
+*.sublime-*
+
+# Temp files
 *.bak
+*.tmp
+*.temp
+
+# Lock files (optional - uncomment if you want to commit package-lock.json)
+# package-lock.json
+
+# Questions (built from private repo)
+questions.wasm
+go.mod
+go.sum

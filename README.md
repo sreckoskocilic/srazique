@@ -9,7 +9,7 @@ A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Sraz
 
 This project was born out of a deep passion for quiz games and countless hours spent playing the original Sraz with friends — until we had memorized every question and started longing for a fresh set. Rather than just updating the question bank, I decided to rebuild the whole thing from scratch.
 
-This version features 1000+ questions sourced by scraping pub quiz sets, Wikipedia, encyclopedias, and schoolbooks — prioritizing reliability and accuracy over quantity.
+This version features **8,600+ unique questions** across 10 categories, sourced by scraping pub quiz sets, Wikipedia, encyclopedias, and schoolbooks — prioritizing reliability and accuracy over quantity.
 
 > For the best overview of the original 1993 DOS game, see: [Sraz (1993) — prvi domaći kviz znanja na računalu koji je spojio igru i učenje](https://virus.hr/en/sraz-1993-prvi-domaci-kviz-znanja-na-racunalu-koji-je-spojio-igru-i-ucenje/)
 
@@ -23,7 +23,7 @@ This version features 1000+ questions sourced by scraping pub quiz sets, Wikiped
 
 - 2-4 player local multiplayer
 - 4x4, 8x8, or 10x10 game board with category-based tiles
-- Trivia questions (10 categories + Croatia/BiH regional)
+- Massive trivia bank (10 categories including Art, Geography, History, Science, and more)
 - Combat system with rank progression
 - Flag capture mechanics
 - Countdown timer per answer (15, 30, or 45 seconds)
@@ -35,10 +35,6 @@ Download the latest release for your platform from the [Releases](../../releases
 
 - **Windows** — download and run `Srazique_Setup.exe`
 - **macOS** — download and open the `.dmg` file, then drag Srazique to your Applications folder
-
-## Contributing
-
-If you'd like to contribute, feel free to reach out or start a [discussion on GitHub](../../discussions). All ideas are welcome.
 
 ## License
 

@@ -1,22 +1,22 @@
 {
   "name": "srazique",
   "productName": "Srazique",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Sraz Rebirth - Strategic board game",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "lint": "eslint main.js scripts/",
     "lint:fix": "eslint main.js scripts/ --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "obfuscate": "node scripts/obfuscate.js",
-    "fixture:stub": "node scripts/generate-stub-fixture.js",
-    "build:mac": "npm run obfuscate && electron-builder --mac",
-    "build:win": "npm run obfuscate && electron-builder --win",
-    "build": "npm run obfuscate && electron-builder --mac --win",
-    "build:dir": "npm run obfuscate && electron-builder --dir"
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build": "electron-builder --mac --win",
+    "build:dir": "electron-builder --dir"
   },
   "keywords": [
     "game",
@@ -38,7 +38,16 @@
     "eslint": "10.1.0",
     "eslint-plugin-html": "^8.1.4",
     "javascript-obfuscator": "5.4.1",
-    "vitest": "^4.1.0"
+    "prettier": "^3.4.0",
+    "vitest": "^4.1.0",
+    "vm2": "^3.10.5"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100
   },
   "build": {
     "appId": "com.srazique.game",
@@ -98,9 +107,12 @@
     "asar": true,
     "files": [
       "index.html",
-      "main.js"
+      "main.js",
+      "preload.js",
+      "questions.wasm",
+      "wasm_exec.js"
     ],
-    "compression": "store",
+    "compression": "maximum",
     "npmRebuild": false
   }
 }
