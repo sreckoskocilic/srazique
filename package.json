@@ -1,7 +1,7 @@
 {
   "name": "srazique",
   "productName": "Srazique",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Sraz Rebirth - Strategic board game",
   "main": "main.js",
   "scripts": {
@@ -114,5 +114,8 @@
     ],
     "compression": "maximum",
     "npmRebuild": false
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
   }
 }

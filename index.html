@@ -9,7 +9,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bs: min(calc(100svh - 90px), calc(100svw - 32px));
+  --bs: min(calc(100svh - 100px), calc(100svw - 32px));
   --ts: calc(var(--bs) / 8);
   /* Modern Color Palette - Croatian Coast Inspired */
   --primary: #e94560;
@@ -56,13 +56,13 @@ body {
   touch-action: manipulation;
 }
 
+
 /* Mobile Responsiveness */
 @media (max-width: 480px) {
   #setup-screen { padding: 20px; }
   #setup-screen h1 { font-size: 2.5rem; letter-spacing: 4px; }
   #setup-screen .subtitle { font-size: 0.7rem; letter-spacing: 3px; }
   .setup-section h3 { font-size: 0.65rem; }
-  .player-count-btns button { padding: 10px 6px; font-size: 0.9rem; }
   .player-input-row input { padding: 8px 10px; font-size: 0.85rem; }
   #start-btn { padding: 12px; font-size: 1rem; }
   #game-screen { padding: 8px; }
@@ -78,7 +78,7 @@ body {
   flex-direction: column;
   max-width: 500px;
   width: 100%;
-  padding: 40px;
+  padding: 24px 32px;
   background: var(--bg-card);
   border-radius: 12px;
   border: 2px solid var(--border);
@@ -86,15 +86,15 @@ body {
 
 .title-container {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
   position: relative;
 }
 
 #setup-screen h1 {
-  font-size: 4rem;
+  font-size: 3rem;
   font-weight: 900;
   letter-spacing: 8px;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   background: linear-gradient(135deg, var(--primary), #ff8a65, var(--primary));
   background-size: 200% auto;
   color: transparent;
@@ -120,54 +120,60 @@ body {
 }
 
 .setup-section + .setup-section {
-  padding-top: 20px;
+  padding-top: 14px;
   border-top: 1px solid #1e2d4a;
   margin-top: 4px;
 }
 
 .setup-section h3 {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 2px;
   color: var(--text-muted);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
-.player-count-btns {
+
+.player-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.player-add-btn {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-bottom: 28px;
-}
-
-.player-count-btns button {
-  flex: 1;
-  padding: 12px;
-  background: var(--secondary);
-  border: 2px solid transparent;
+  padding: 9px 10px;
+  background: rgba(233, 69, 96, 0.07);
+  border: 1.5px dashed rgba(233, 69, 96, 0.4);
   border-radius: 8px;
-  color: var(--text);
-  font-size: 1.1rem;
+  color: rgba(233, 69, 96, 0.7);
+  font-size: 0.88rem;
   font-weight: 700;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  width: 100%;
 }
-
-.player-count-btns button.active {
+.player-add-btn:hover {
+  background: rgba(233, 69, 96, 0.14);
   border-color: var(--primary);
-  background: var(--bg-dark);
   color: var(--primary);
 }
-
-.player-count-btns button:hover:not(.active) {
-  background: var(--secondary-hover);
+.player-remove-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  border: 1.5px solid #2a3a5c;
+  border-radius: 4px;
+  color: #556;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+  line-height: 1;
 }
-
-.player-count-btns button:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.player-inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.player-remove-btn:hover { border-color: var(--primary); color: var(--primary); }
 
 .player-input-row {
   display: flex;
@@ -265,12 +271,12 @@ body {
 .setup-actions {
   display: flex;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 .setup-actions button {
   flex: 1;
-  padding: 10px;
+  padding: 8px;
   background: transparent;
   border: 2px solid var(--border);
   border-radius: 6px;
@@ -287,8 +293,8 @@ body {
 
 #start-btn {
   width: 100%;
-  padding: 16px;
-  font-size: 1.1rem;
+  padding: 12px;
+  font-size: 1rem;
   letter-spacing: 2px;
 }
 
@@ -297,13 +303,19 @@ body {
   display: none;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 12px 16px;
   gap: 10px;
+  width: 100%;
+  height: 100svh;
+  box-sizing: border-box;
 }
 
 /* ===== BOARD ===== */
 #board-wrap {
-  flex-shrink: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #board {
@@ -500,14 +512,14 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  width: var(--bs);
+  width: 100%;
 }
 
 #turn-panel {
   flex: 1;
   background: #16213e;
   border-radius: 8px;
-  padding: 8px 16px 8px 14px;
+  padding: 12px 16px 12px 14px;
   border: 2px solid #0f3460;
   border-left: 4px solid #444;
   display: flex;
@@ -534,14 +546,14 @@ body {
 }
 
 #turn-panel .turn-player {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
   white-space: nowrap;
   line-height: 1.2;
 }
 
 #turn-panel .phase-text {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   color: #888;
   white-space: nowrap;
   overflow: hidden;
@@ -553,27 +565,36 @@ body {
   #turn-panel .turn-player { font-size: 0.9rem; }
 }
 
-#peg-counts {
+
+#player-stats {
   margin-left: auto;
   display: flex;
-  gap: 10px;
+  gap: 14px;
   align-items: center;
   flex-shrink: 0;
 }
 
-.peg-count-item {
+.player-stat-item {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
 }
 
-.peg-count-swatch {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  flex-shrink: 0;
+
+.player-stat-ratio {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  align-items: center;
+}
+
+.player-stat-pct {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.75;
+  line-height: 1;
+  margin-top: 5px;
 }
 
 #quit-btn {
@@ -595,6 +616,38 @@ body {
 #quit-btn:hover { border-color: #e94560; color: #e94560; }
 
 /* Game log */
+
+/* ===== TURN ANNOUNCE ===== */
+#turn-announce {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 15, 30, 0.85);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+#turn-announce.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+#turn-announce-name {
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+#turn-announce-sub {
+  font-size: 0.8rem;
+  letter-spacing: 5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 10px;
+}
 
 /* ===== QUESTION MODAL ===== */
 #modal-overlay {
@@ -882,11 +935,15 @@ body {
 .timer-text { font-size: 0.85rem; font-weight: 700; text-align: center; margin-top: 6px; }
 .timer-text.warning { color: var(--warning); }
 .timer-text.danger { color: var(--danger); }
-.timer-setup-group { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 20px; }
-.timer-btn { flex: 1; padding: 10px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+.timer-setup-group { display: flex; gap: 8px; margin-top: 6px; margin-bottom: 14px; }
+.timer-btn { flex: 1; padding: 8px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .timer-btn.selected { border-color: var(--primary); background: var(--bg-dark); color: var(--primary); }
 .timer-btn:hover:not(.selected) { background: var(--secondary-hover); }
-.nav-highlight { 
+.cat-toggle-btns { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+.cat-toggle-btn { flex: 1 1 calc(20% - 6px); padding: 6px 4px; background: var(--secondary); border: 2px solid transparent; border-radius: 6px; color: var(--text); font-size: 0.7rem; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s; text-align: center; letter-spacing: 0.5px; }
+.cat-toggle-btn.active { border-color: var(--primary); background: var(--bg-dark); color: var(--primary); }
+.cat-toggle-btn:hover:not(.active) { background: var(--secondary-hover); }
+.nav-highlight {
   outline: 3px dashed #fff !important;
   outline-offset: -3px;
   z-index: 10;
@@ -908,23 +965,18 @@ body {
     <div class="subtitle">THE ULTIMATE TRIVIA BATTLE</div>
   </div>
 
-  <div class="setup-section">
-    <h3>Number of Players</h3>
-    <div class="player-count-btns" id="player-count-btns" role="radiogroup" aria-label="Select number of players">
-      <button onclick="setPlayerCount(2)" class="active" role="radio" aria-checked="true">2</button>
-      <button onclick="setPlayerCount(3)" role="radio" aria-checked="false">3</button>
-      <button onclick="setPlayerCount(4)" role="radio" aria-checked="false">4</button>
-    </div>
-  </div>
 
-  <div class="setup-section">
-    <h3>Board Size</h3>
-    <div class="player-count-btns" id="board-size-btns" role="radiogroup" aria-label="Select board size">
-      <button onclick="setBoardSize(4)" data-size="4" role="radio" aria-checked="false">4×4</button>
-      <button onclick="setBoardSize(8)" data-size="8" class="active" role="radio" aria-checked="true">8×8</button>
-      <button onclick="setBoardSize(10)" data-size="10" role="radio" aria-checked="false">10×10</button>
-    </div>
-  </div>
+   <div class="setup-section">
+     <h3>Board Size</h3>
+     <div class="player-count-btns" id="board-size-btns" role="radiogroup" aria-label="Select board size">
+       <button onclick="setBoardSize(4)" data-size="4" role="radio" aria-checked="false">4×4</button>
+       <button onclick="setBoardSize(5)" data-size="5" role="radio" aria-checked="false">5×5</button>
+       <button onclick="setBoardSize(6)" data-size="6" role="radio" aria-checked="false">6×6</button>
+       <button onclick="setBoardSize(7)" data-size="7" role="radio" aria-checked="false">7×7</button>
+       <button onclick="setBoardSize(8)" data-size="8" class="active" role="radio" aria-checked="true">8×8</button>
+       <button onclick="setBoardSize(10)" data-size="10" role="radio" aria-checked="false">10×10</button>
+     </div>
+   </div>
 
   <div class="setup-section">
     <h3>Player Names & Colors</h3>
@@ -941,11 +993,63 @@ body {
   </div>
 
   <button id="start-btn" class="btn-primary" onclick="startGame()" aria-label="Start game">START GAME</button>
-  <div id="qbank-count" style="margin-top:12px;text-align:center;font-size:0.75rem;color:#778;letter-spacing:1px;"></div>
+  <div id="qbank-count" style="margin-top:10px;text-align:center;font-size:0.75rem;color:#778;letter-spacing:1px;"></div>
 
   <div class="setup-actions">
     <button onclick="showHelp()" aria-label="How to play">How to Play</button>
     <button onclick="toggleHighContrast()" aria-label="Toggle high contrast mode">High Contrast</button>
+    <button onclick="toggleAdvancedSection()" id="btn-advanced" aria-label="Advanced settings">Settings</button>
+    <button onclick="toggleOnlineSection()" aria-label="Play Online">Play Online</button>
+  </div>
+
+  <div id="advanced-section" style="display:none">
+    <div class="setup-section" style="margin-top:14px">
+      <h3>Game Options</h3>
+      <div class="timer-setup-group">
+        <button class="timer-btn" id="btn-max-rank" onclick="toggleMaxRankStart()">Start as Vitez</button>
+      </div>
+    </div>
+
+    <div class="setup-section">
+      <h3>Categories</h3>
+      <div class="cat-toggle-btns" id="cat-toggle-btns" role="group" aria-label="Select question categories">
+        <button class="cat-toggle-btn active" data-cat="art" onclick="toggleCat('art')">Art</button>
+        <button class="cat-toggle-btn active" data-cat="geography" onclick="toggleCat('geography')">Geography</button>
+        <button class="cat-toggle-btn active" data-cat="history" onclick="toggleCat('history')">History</button>
+        <button class="cat-toggle-btn active" data-cat="literature" onclick="toggleCat('literature')">Literature</button>
+        <button class="cat-toggle-btn active" data-cat="science" onclick="toggleCat('science')">Science</button>
+        <button class="cat-toggle-btn active" data-cat="business" onclick="toggleCat('business')">Business</button>
+        <button class="cat-toggle-btn active" data-cat="sport" onclick="toggleCat('sport')">Sports</button>
+        <button class="cat-toggle-btn active" data-cat="religion" onclick="toggleCat('religion')">Religion</button>
+        <button class="cat-toggle-btn active" data-cat="entertainment" onclick="toggleCat('entertainment')">Entertainment</button>
+        <button class="cat-toggle-btn active" data-cat="general" onclick="toggleCat('general')">General</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-section" id="online-section" style="display:none;margin-top:16px">
+    <h3>Online Multiplayer</h3>
+    <label for="online-name">Your name</label>
+    <input id="online-name" type="text" maxlength="16" placeholder="e.g. Kmet42" />
+    <button class="btn-primary" onclick="onlineCreateRoom()" style="margin-bottom:0.75rem">Create Room</button>
+    <div style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin:0.25rem 0 0.75rem">— or join —</div>
+    <div style="display:flex;gap:8px">
+      <input id="online-join-code" type="text" maxlength="5" placeholder="ROOM CODE" style="text-transform:uppercase;letter-spacing:0.2em;flex:1;margin-bottom:0" oninput="this.value=this.value.toUpperCase()" />
+      <button class="btn-primary" onclick="onlineJoinRoom()" style="flex:0 0 auto;width:auto;padding:0.6rem 1rem;margin-bottom:0">Join</button>
+    </div>
+    <div id="online-status" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.6rem;text-align:center;min-height:1.2em"></div>
+  </div>
+</div>
+
+<!-- ONLINE LOBBY OVERLAY -->
+<div id="online-lobby" style="position:fixed;inset:0;background:var(--bg-dark);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
+  <div style="background:var(--bg-card);border:2px solid var(--border);border-radius:12px;padding:2rem;width:100%;max-width:420px">
+    <p style="text-align:center;color:var(--text-muted);font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.25rem">Room Code</p>
+    <div id="lobby-code-display" style="text-align:center;font-size:2.5rem;font-weight:900;letter-spacing:0.3em;color:var(--primary);margin-bottom:1.5rem">-----</div>
+    <ul id="online-lobby-players" style="list-style:none;margin-bottom:1rem"></ul>
+    <div id="online-lobby-status" style="color:var(--text-muted);font-size:0.85rem;text-align:center;margin-bottom:1rem"></div>
+    <button class="btn-primary" id="btn-start-online" disabled onclick="onlineStartGame()" style="margin-bottom:0.5rem">Waiting for players…</button>
+    <button onclick="onlineLeaveLobby()" style="width:100%;padding:0.6rem;background:transparent;border:2px solid var(--border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-size:0.9rem">Leave Room</button>
   </div>
 </div>
 
@@ -958,7 +1062,7 @@ body {
         <div class="turn-player" id="turn-player-name" aria-label="Current player">—</div>
         <div class="phase-text" id="phase-text" aria-label="Current phase">—</div>
       </div>
-      <div id="peg-counts" aria-label="Peg counts"></div>
+      <div id="player-stats" aria-label="Player statistics"></div>
     </div>
     <button id="quit-btn" onclick="quitGame()" title="Quit to setup" aria-label="Quit game">✕</button>
   </div>
@@ -988,6 +1092,12 @@ body {
   </div>
 </div>
 
+<!-- TURN ANNOUNCE -->
+<div id="turn-announce" aria-live="assertive" aria-atomic="true">
+  <div id="turn-announce-name"></div>
+  <div id="turn-announce-sub">YOUR TURN</div>
+</div>
+
 <!-- GAME OVER -->
 <div id="gameover-screen" role="dialog" aria-modal="true" aria-labelledby="gameover-title">
   <h1 id="gameover-title">GAME OVER</h1>
@@ -1002,10 +1112,10 @@ body {
 <div id="help-modal">
   <div class="help-content" role="document">
     <h2>How to Play</h2>
-    
+
     <h3>Objective</h3>
     <p>Capture opponent pegs and be the last player remaining on the board!</p>
-    
+
     <h3>Gameplay</h3>
     <ul>
       <li><strong>Select a peg</strong> — Click or use arrow keys to navigate, Enter to select</li>
@@ -1013,17 +1123,17 @@ body {
       <li><strong>Answer correctly</strong> — Your peg advances in rank (Kmet → Vojnik → Vitez)</li>
       <li><strong>Answer incorrectly</strong> — Your peg may be pushed back or captured!</li>
     </ul>
-    
+
     <h3>Combat</h3>
     <ul>
       <li>Moving onto an opponent's tile triggers COMBAT</li>
       <li>Answer two questions to determine the victor</li>
       <li>Winner stays, loser is eliminated</li>
     </ul>
-    
+
     <h3>Flag Tiles</h3>
     <p>Corner tiles have flags — capture them for bonus points!</p>
-    
+
     <h3>Keyboard Controls</h3>
     <ul>
       <li><strong>Arrow keys</strong> — Navigate board</li>
@@ -1031,7 +1141,7 @@ body {
       <li><strong>A/B/C/D or 1/2/3/4</strong> — Select answer</li>
       <li><strong>Escape</strong> — Cancel/pause</li>
     </ul>
-    
+
     <button class="btn-primary help-close" onclick="closeHelp()">GOT IT!</button>
   </div>
 </div>
@@ -1049,7 +1159,7 @@ const _movedPegs = new Set();
 // CONSTANTS
 // ============================================================
 
-const PLAYER_COLORS  = ['#E53935', '#1E88E5', '#43A047', '#FB8C00'];
+const PLAYER_COLORS  = ['#FF4444', '#1E88E5', '#43A047', '#FB8C00'];
 const DEFAULT_NAMES  = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
 const RANK_NAMES     = ['Kmet', 'Vojnik', 'Vitez'];
 const RANK_BADGE     = ['', 'II', 'III'];
@@ -1065,7 +1175,7 @@ const PHASE = {
 };
 
 const CATS = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
-const RANK_UP_THRESHOLD = 5;
+function rankThreshold() { return State.boardSize > 8 ? 5 : 3; }
 const SYM_FLAG   = '⚑';
 const SYM_COMBAT = '⚔';
 const OPTION_KEYS = ['A','B','C','D'];
@@ -1075,7 +1185,7 @@ const TIMER_OPTIONS = [15, 30, 45];
 const TIMER_DEFAULT = 30;
 const TIMER_TICK_MS = 100;
 const NAV_KEYS = {'ArrowUp':[-1,0], 'ArrowDown':[1,0], 'ArrowLeft':[0,-1], 'ArrowRight':[0,1]};
-function randomCat() { return CATS[Math.floor(Math.random() * CATS.length)]; }
+function randomCat() { const cats = State.setup.enabledCats; return cats[Math.floor(Math.random() * cats.length)]; }
 function tileCat(tile) { return tile.category === 'flag' ? 'general' : tile.category; }
 const CAT_NAMES = {
   art:'Art', geography:'Geography', history:'History', literature:'Literature',
@@ -1092,6 +1202,8 @@ const State = {
     playerCount: 2,
     boardSize: 8,
     timerDuration: TIMER_DEFAULT,
+    enabledCats: [...CATS],
+    maxRankStart: false,
   },
   game: null,
   questions: {},
@@ -1120,13 +1232,11 @@ const State = {
     gameScreen: null,
     gameoverScreen: null,
     winnerText: null,
-    playerCountBtns: null,
     boardSizeBtns: null,
     qbankCount: null,
     modal: null,
     turnPanel: null,
     turnPlayerDot: null,
-    pegCounts: null,
   },
 
   dirty: {
@@ -1171,21 +1281,21 @@ function updateBoardPreview() {
 
 function showColorPicker(playerIndex, button) {
   document.querySelectorAll('.player-color-picker').forEach(p => p.remove());
-  
+
   const picker = document.createElement('div');
   picker.className = 'player-color-picker show';
-  picker.innerHTML = COLOR_OPTIONS.map(color => 
-    `<div class="color-option ${State.playerColors[playerIndex] === color ? 'selected' : ''}" 
-          style="background:${color}" data-color="${color}" 
+  picker.innerHTML = COLOR_OPTIONS.map(color =>
+    `<div class="color-option ${State.playerColors[playerIndex] === color ? 'selected' : ''}"
+          style="background:${color}" data-color="${color}"
           onclick="selectColor(${playerIndex}, '${color}')"></div>`
   ).join('');
-  
+
   const rect = button.getBoundingClientRect();
   picker.style.left = rect.left + 'px';
   picker.style.top = (rect.bottom + 5) + 'px';
-  
+
   document.body.appendChild(picker);
-  
+
   setTimeout(() => {
     document.addEventListener('click', function closePicker(e) {
       if (!picker.contains(e.target) && e.target !== button) {
@@ -1236,9 +1346,9 @@ function playSound(type) {
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
+
     const now = ctx.currentTime;
-    
+
     switch(type) {
       case 'select':
         osc.frequency.setValueAtTime(440, now);
@@ -1303,7 +1413,8 @@ function generateLayoutMap() {
     for (let c = 0; c < S; c++)
       if (isCorner(r, c) && useFlagCorners) map[r][c] = 'F';
       else nonCorner.push([r, c]);
-  const pool = shuffle(Array.from({length: nonCorner.length}, (_, i) => i % CATS.length));
+  const activeCats = State.setup.enabledCats;
+  const pool = shuffle(Array.from({length: nonCorner.length}, (_, i) => i % activeCats.length));
   nonCorner.forEach(([r, c], i) => { map[r][c] = pool[i]; });
   return map;
 }
@@ -1375,13 +1486,13 @@ const COORD_BASE = 100;
 function loadQuestions() {
   if (State.questionsLoaded) return;
   const allQuestions = window.SRAZ_QUESTIONS || {};
-  
+
   // Calculate how many questions we need per category
   // Max board is 10x10 = 100 tiles, each tile needs ~2-3 questions for variety
   const boardSize = State.setup.boardSize || 10;
   const tilesPerCategory = Math.ceil((boardSize * boardSize) / CATS.length);
   const questionsPerCategory = Math.min(tilesPerCategory * 3, 50); // Max 50 per category
-  
+
   // Randomly select questions for each category
   for (const cat of CATS) {
     const available = allQuestions[cat] || [];
@@ -1392,7 +1503,7 @@ function loadQuestions() {
       State.questions[cat] = available.sort(() => Math.random() - 0.5).slice(0, questionsPerCategory);
     }
   }
-  
+
   State.questionsLoaded = true;
   updateQBankDisplay();
 }
@@ -1411,10 +1522,25 @@ function updateQBankDisplay() {
 
 function setPlayerCount(n) {
   State.setup.playerCount = n;
-  State.DOM.playerCountBtns.forEach((btn, i) => {
-    btn.classList.toggle('active', i + 2 === n);
-  });
   renderPlayerInputs();
+}
+
+function toggleMaxRankStart() {
+  State.setup.maxRankStart = !State.setup.maxRankStart;
+  document.getElementById('btn-max-rank').classList.toggle('selected', State.setup.maxRankStart);
+}
+
+function toggleCat(cat) {
+  const enabled = State.setup.enabledCats;
+  const idx = enabled.indexOf(cat);
+  if (idx >= 0) {
+    if (enabled.length <= 3) return;
+    enabled.splice(idx, 1);
+  } else {
+    enabled.push(cat);
+  }
+  const btn = document.querySelector(`#cat-toggle-btns [data-cat="${cat}"]`);
+  if (btn) btn.classList.toggle('active', idx < 0);
 }
 
 function setBoardSize(s) {
@@ -1431,35 +1557,48 @@ function setBoardSize(s) {
 
 function renderPlayerInputs() {
   const container = State.DOM.playerInputs;
-  if (container.children.length === 0) {
-    for (let i = 0; i < 4; i++) {
-      const row = document.createElement('div');
-      row.className = 'player-input-row';
-      const dot = document.createElement('div');
-      dot.className = 'player-color-dot';
-      dot.style.background = State.playerColors[i];
-      dot.onclick = () => showColorPicker(i, dot);
-      dot.setAttribute('role', 'button');
-      dot.setAttribute('aria-label', `Player ${i + 1} color, click to change`);
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = DEFAULT_NAMES[i];
-      input.disabled = i >= State.setup.playerCount;
-      input.maxLength = 12;
-      input.setAttribute('aria-label', `Player ${i + 1} name`);
-      row.appendChild(dot);
-      row.appendChild(input);
-      container.appendChild(row);
+  const count = State.setup.playerCount;
+  // Save current input values before rebuild
+  const saved = Array.from(container.querySelectorAll('input')).map(el => el.value);
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const row = document.createElement('div');
+    row.className = 'player-input-row';
+    const dot = document.createElement('div');
+    dot.className = 'player-color-dot';
+    dot.style.background = State.playerColors[i];
+    dot.onclick = () => showColorPicker(i, dot);
+    dot.setAttribute('role', 'button');
+    dot.setAttribute('aria-label', `Player ${i + 1} color`);
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = DEFAULT_NAMES[i];
+    input.value = saved[i] || '';
+    input.maxLength = 12;
+    input.setAttribute('aria-label', `Player ${i + 1} name`);
+    row.appendChild(dot);
+    row.appendChild(input);
+    if (i >= 2) {
+      const rem = document.createElement('button');
+      rem.className = 'player-remove-btn';
+      rem.textContent = '×';
+      rem.setAttribute('aria-label', `Remove player ${i + 1}`);
+      rem.onclick = () => setPlayerCount(i);
+      row.appendChild(rem);
     }
-  } else {
-    const inputs = container.querySelectorAll('input');
-    const dots = container.querySelectorAll('.player-color-dot');
-    inputs.forEach((inp, i) => { 
-      inp.disabled = i >= State.setup.playerCount; 
-      dots[i].style.background = State.playerColors[i];
-    });
+    container.appendChild(row);
   }
-  // Initialize board preview
+
+  if (count < 4) {
+    const add = document.createElement('button');
+    add.className = 'player-add-btn';
+    add.textContent = `+ Player ${count + 1}`;
+    add.setAttribute('aria-label', `Add player ${count + 1}`);
+    add.onclick = () => setPlayerCount(count + 1);
+    container.appendChild(add);
+  }
+
   updateBoardPreview();
 }
 
@@ -1506,7 +1645,7 @@ function initGame(playerNames) {
     for (let c = 0; c < State.boardSize; c++) {
       const val = layoutMap[r][c];
       board[r][c] = {
-        category: val === 'F' ? 'flag' : CATS[val],
+        category: val === 'F' ? 'flag' : State.setup.enabledCats[val],
         pegId: null,
         cornerOwner: (val === 'F') ? cornerOwnerMap[`${r},${c}`] : null
       };
@@ -1523,11 +1662,12 @@ function initGame(playerNames) {
     const pegIds = [];
     for (const pos of startPositions[i]) {
       const id = `p${i}_peg${pegIdx++}`;
-      pegs[id] = { id, playerId: i, row: pos.r, col: pos.c, rank: 0, correct: 0, num: pegIds.length + 1 };
+      const startRank = State.setup.maxRankStart ? 2 : 0;
+      pegs[id] = { id, playerId: i, row: pos.r, col: pos.c, rank: startRank, correct: 0, num: pegIds.length + 1 };
       board[pos.r][pos.c].pegId = id;
       pegIds.push(id);
     }
-    return { id: i, name, color: PLAYER_COLORS[i], pegIds };
+    return { id: i, name, color: State.playerColors[i], pegIds, stats: { attempts: 0, correct: 0 } };
   });
 
   // Used questions tracking (per category)
@@ -1550,6 +1690,7 @@ function initGame(playerNames) {
     flagCaptureData: null,
     pendingMove: null,
     usedQ,
+    wrongQ: new Set(),
   };
 
   State.DOM.tiles = [];
@@ -1587,16 +1728,22 @@ function getValidMoves(pegId) {
 function getQuestion(category) {
   let cat = category;
   if (!State.questions[cat]?.length) {
-    // Requested category is empty — try every category before giving up
-    const fallback = CATS.find(c => State.questions[c]?.length > 0);
+    // Requested category is empty — try enabled categories before giving up
+    const fallback = State.setup.enabledCats.find(c => State.questions[c]?.length > 0);
     if (!fallback) return null;
     cat = fallback;
   }
   const pool = State.questions[cat];
   if (!pool?.length) return null;
   const usedSet = State.game.usedQ[cat];
-  if (usedSet.size >= pool.length) usedSet.clear();
-  const candidates = [];
+  const wrongIds = State.game.wrongQ;
+  if (usedSet.size >= pool.length) {
+    usedSet.clear();
+    for (let i = 0; i < pool.length; i++) {
+      if (wrongIds.has(pool[i].id)) usedSet.add(i);
+    }
+  }
+  let candidates = [];
   for (let i = 0; i < pool.length; i++) if (!usedSet.has(i)) candidates.push(i);
   if (candidates.length === 0) return null;
   const idx = candidates[Math.floor(Math.random() * candidates.length)];
@@ -1705,6 +1852,17 @@ function advanceTurn() {
     }
   }
   markUIDirty();
+  showTurnAnnounce(State.game.players[next]);
+}
+
+
+function showTurnAnnounce(player) {
+  const el = State.DOM.turnAnnounce;
+  if (!el) return;
+  State.DOM.turnAnnounceName.textContent = player.name;
+  State.DOM.turnAnnounceName.style.color = player.color;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2000);
 }
 
 function selectPeg(pegId) {
@@ -1719,6 +1877,7 @@ function selectPeg(pegId) {
 
 // ============================================================
 function onPegClick(pegId) {
+  if (State.online?.active) { onOnlinePegClick(pegId); return; }
   if (State.game.phase === PHASE.SELECT_TILE) {
     if (pegId === State.game.selectedPegId) {
       State.game.selectedPegId = null;
@@ -1738,6 +1897,7 @@ function onPegClick(pegId) {
 }
 
 function onTileClick(r, c) {
+  if (State.online?.active) { onOnlineTileClick(r, c); return; }
   if (State.game.phase !== PHASE.SELECT_TILE) return;
   const tile = State.game.board[r][c];
   const isValid = isValidMoveTarget(r, c);
@@ -1838,6 +1998,17 @@ function onAnswer(chosenIdx) {
   const q = State.game.question;
   if (!q) return;
   stopTimer(); // Stop timer on answer
+
+  if (State.online?.active) {
+    State.DOM.modalOptionBtns.forEach((btn, i) => {
+      btn.disabled = true;
+      if (i === chosenIdx) btn.classList.add('chosen');
+    });
+    State.DOM.modalContinueWrap.style.display = 'block';
+    State.online.pendingAnswers.push({ questionId: q.id, answerIdx: chosenIdx });
+    return;
+  }
+
   const correct = chosenIdx === q.a;
 
   State.DOM.modalOptionBtns.forEach((btn, i) => {
@@ -1858,8 +2029,32 @@ const QUESTION_HANDLERS = {
 
 function continueAfterQuestion() {
   if (!State.game) return;
+
+  if (State.online?.active) {
+    State.DOM.modalOverlay.classList.remove('visible');
+    const nextIdx = State.online.currentQIdx + 1;
+    if (nextIdx < State.online.pendingQuestions.length) {
+      State.online.currentQIdx = nextIdx;
+      const q = State.online.pendingQuestions[nextIdx];
+      State.game.question = { ...q, a: -1 };
+      const mt = State.online.pendingMove.moveType;
+      showQuestion(mt === 'combat', nextIdx + 1, mt === 'flag');
+    } else {
+      onlineSubmitTurn();
+    }
+    return;
+  }
+
   const correct = _lastAnswerCorrect;
   const phase = State.game.phase;
+  if (!correct && State.game.question?.id) {
+    State.game.wrongQ.add(State.game.question.id);
+  }
+  const cp = State.game.players[State.game.currentPlayerIdx];
+  if (cp) {
+    cp.stats.attempts++;
+    if (correct) cp.stats.correct++;
+  }
   State.DOM.modalOverlay.classList.remove('visible');
   setTimeout(() => QUESTION_HANDLERS[phase](correct), 220);
 }
@@ -1873,18 +2068,15 @@ function handleNormalMove(correct) {
   if (correct) {
     movePegTo(State.game.selectedPegId, r, c);
     peg.correct++;
-
-    if (peg.correct >= RANK_UP_THRESHOLD) {
+    if (peg.correct >= rankThreshold()) {
       rankUp(State.game.selectedPegId);
     }
+  }
 
-    State.game.movesRemaining--;
-    if (State.game.movesRemaining > 0) {
-      State.game.validMoves = new Set(getValidMoves(State.game.selectedPegId).map(({r,c}) => r * COORD_BASE + c));
-      State.game.phase = PHASE.SELECT_TILE;
-    } else {
-      finishPegMove();
-    }
+  State.game.movesRemaining--;
+  if (State.game.movesRemaining > 0) {
+    State.game.validMoves = new Set(getValidMoves(State.game.selectedPegId).map(({r,c}) => r * COORD_BASE + c));
+    State.game.phase = PHASE.SELECT_TILE;
   } else {
     finishPegMove();
   }
@@ -1940,8 +2132,13 @@ function handleCombatQ2(correct) {
   const defPeg = State.game.pegs[defPegId];
   if (!defPeg) { finishBattle(); checkEndGame(); renderAll(); return; }
 
+  const atkPeg = State.game.pegs[State.game.selectedPegId];
+  const rankWin = atkPeg && atkPeg.rank > defPeg.rank;
+
   if (correct) {
     rankUp(State.game.selectedPegId);
+  }
+  if (correct || rankWin) {
     if (defPeg.rank > 0) {
       rankDown(defPegId);
       pushPegAway(defPegId);
@@ -1959,9 +2156,8 @@ function handleCombatQ2(correct) {
 function finishBattle() {
   if (!State.game) return;
   State.game.combatData = null;
-  State.game.selectedPegId = null;
   if (State.game.phase !== PHASE.GAME_OVER) {
-    advanceTurn();
+    finishPegMove();
   }
 }
 
@@ -2169,7 +2365,7 @@ function updateTileDOM(r, c) {
     if (_movedPegs.has(peg.id)) pegEl.classList.add('just-moved');
     pegEl.style.background = player.color;
     pegEl.textContent = String(peg.num);
-    pegEl.title = `${player.name} — ${RANK_NAMES[peg.rank]} (${peg.correct}/${RANK_UP_THRESHOLD})`;
+    pegEl.title = `${player.name} — ${RANK_NAMES[peg.rank]} (${peg.correct}/${rankThreshold()})`;
 
     if (peg.rank > 0) {
       const badge = document.createElement('div');
@@ -2193,30 +2389,39 @@ function flushUIUpdates() {
   State.DOM.turnPlayerDot.style.boxShadow = `0 0 8px 2px ${cp.color}66`;
   State.DOM.turnPanel.style.borderLeftColor = cp.color;
 
-  const pegCounts = State.DOM.pegCounts;
-  pegCounts.innerHTML = '';
+  const playerStats = State.DOM.playerStats;
+  playerStats.innerHTML = '';
   for (const p of State.game.players) {
+    if (p.pegIds.length === 0) continue;
+    const { attempts, correct } = p.stats;
+    const pct = attempts > 0 ? (correct / attempts * 100).toFixed(1) : '—';
     const item = document.createElement('div');
-    item.className = 'peg-count-item';
-    item.style.color = p.pegIds.length === 0 ? '#444' : p.color;
-    item.style.opacity = p.pegIds.length === 0 ? '0.45' : '1';
-    const swatch = document.createElement('div');
-    swatch.className = 'peg-count-swatch';
-    swatch.style.background = p.pegIds.length === 0 ? '#333' : p.color;
-    item.appendChild(swatch);
-    item.appendChild(document.createTextNode(p.pegIds.length));
-    pegCounts.appendChild(item);
+    item.className = 'player-stat-item';
+    item.style.color = p.color;
+    const ratio = document.createElement('div');
+    ratio.className = 'player-stat-ratio';
+    ratio.textContent = `${correct}/${attempts}`;
+    const pctEl = document.createElement('div');
+    pctEl.className = 'player-stat-pct';
+    pctEl.textContent = attempts > 0 ? `${pct}%` : '—';
+    item.appendChild(ratio);
+    item.appendChild(pctEl);
+    playerStats.appendChild(item);
   }
 
   let phaseText = '';
   if (State.game.phase === PHASE.SELECT_PEG) {
     const count = State.game.pegsToMove.size;
-    phaseText = `Select a peg (${count} remaining)`;
+    if (State.online?.active && count === 0) {
+      phaseText = `Waiting for ${cp.name}…`;
+    } else {
+      phaseText = `Select a peg (${count} remaining)`;
+    }
   } else if (State.game.phase === PHASE.SELECT_TILE) {
     const peg = State.game.pegs[State.game.selectedPegId];
     if (peg) {
       const ml = State.game.movesRemaining;
-      phaseText = `${RANK_NAMES[peg.rank]} · ${peg.correct}/${RANK_UP_THRESHOLD} · ${ml} move${ml !== 1 ? 's' : ''} left`;
+      phaseText = `${RANK_NAMES[peg.rank]} · ${peg.correct}/${rankThreshold()} · ${ml} move${ml !== 1 ? 's' : ''} left`;
     }
   } else if (State.game.phase === PHASE.FLAG_Q) {
     const done = State.game.flagCaptureData?.questionsAnswered ?? 0;
@@ -2231,6 +2436,9 @@ function flushUIUpdates() {
     phaseText = 'Game Over!';
   }
   State.DOM.phaseText.textContent = phaseText;
+  State.DOM.phaseText.style.color = State.game.phase === PHASE.SELECT_TILE ? cp.color : '';
+  State.DOM.phaseText.style.fontSize = State.game.phase === PHASE.SELECT_TILE ? '0.9rem' : '';
+  State.DOM.phaseText.style.fontWeight = State.game.phase === PHASE.SELECT_TILE ? '700' : '';
 }
 
 function markAllTilesDirty() {
@@ -2254,6 +2462,8 @@ function renderAll() {
 // INIT
 // ============================================================
 try {
+  State.DOM.turnAnnounce     = document.getElementById('turn-announce');
+  State.DOM.turnAnnounceName = document.getElementById('turn-announce-name');
   State.DOM.modalOverlay    = document.getElementById('modal-overlay');
   State.DOM.modalCatBadge   = document.getElementById('modal-cat-badge');
   State.DOM.modalPlayerLabel= document.getElementById('modal-player-label');
@@ -2267,7 +2477,6 @@ try {
   State.DOM.gameScreen      = document.getElementById('game-screen');
   State.DOM.gameoverScreen  = document.getElementById('gameover-screen');
   State.DOM.winnerText      = document.getElementById('winner-text');
-  State.DOM.playerCountBtns = document.getElementById('player-count-btns').querySelectorAll('button');
   State.DOM.boardSizeBtns   = document.getElementById('board-size-btns').querySelectorAll('button');
   State.DOM.qbankCount      = document.getElementById('qbank-count');
   State.DOM.playerInputs    = document.getElementById('player-inputs');
@@ -2275,8 +2484,8 @@ try {
   State.DOM.modal           = document.getElementById('modal');
   State.DOM.turnPanel       = document.getElementById('turn-panel');
   State.DOM.turnPlayerDot   = document.getElementById('turn-player-dot');
-  State.DOM.pegCounts       = document.getElementById('peg-counts');
-  setPlayerCount(2);
+  State.DOM.playerStats     = document.getElementById('player-stats');
+  renderPlayerInputs();
   setBoardSize(8);
   loadQuestions();
 } catch(e) {
@@ -2373,7 +2582,7 @@ function handleBoardEnter() {
   const { row, col } = State.navCursor;
   const tile = State.game.board[row]?.[col];
   if (!tile) return;
-  
+
   // Check if there's a peg on this tile
   if (tile.pegId) {
     const peg = State.game.pegs[tile.pegId];
@@ -2389,6 +2598,269 @@ function handleBoardEnter() {
     return true;
   }
   return false;
+}
+
+// ============================================================
+// ONLINE MULTIPLAYER
+// ============================================================
+
+State.online = {
+  active: false,
+  myPlayerIndex: null,
+  roomCode: null,
+  isHost: false,
+  pendingMove: null,
+  pendingQuestions: [],
+  pendingAnswers: [],
+  currentQIdx: 0,
+};
+
+const SRAZ_SERVER = 'https://sraz.nbastables.com';
+
+function toggleAdvancedSection() {
+  const s = document.getElementById('advanced-section');
+  const open = s.style.display === 'none';
+  s.style.display = open ? 'block' : 'none';
+  document.getElementById('btn-advanced').classList.toggle('active', open);
+}
+
+function toggleOnlineSection() {
+  const s = document.getElementById('online-section');
+  s.style.display = s.style.display === 'none' ? 'block' : 'none';
+}
+
+function setOnlineStatus(msg, isError) {
+  const el = document.getElementById('online-status');
+  if (el) { el.textContent = msg; el.style.color = isError ? 'var(--primary)' : 'var(--text-muted)'; }
+}
+
+function getOnlineName() {
+  const name = document.getElementById('online-name')?.value.trim();
+  if (!name) { setOnlineStatus('Enter your name first', true); return null; }
+  return name;
+}
+
+let _onlineListenersRegistered = false;
+
+async function onlineConnect() {
+  setOnlineStatus('Connecting…');
+  const result = await window.multiplayerAPI.connect(SRAZ_SERVER);
+  if (result.error) { setOnlineStatus(result.error, true); return false; }
+
+  if (!_onlineListenersRegistered) {
+    _onlineListenersRegistered = true;
+    window.multiplayerAPI.on('room:player_joined', ({ players }) => updateOnlineLobbyPlayers(players));
+    window.multiplayerAPI.on('room:player_left', ({ players, playerName }) => {
+      updateOnlineLobbyPlayers(players);
+      document.getElementById('online-lobby-status').textContent = `${playerName} left`;
+    });
+    window.multiplayerAPI.on('room:full', ({ players }) => {
+      updateOnlineLobbyPlayers(players);
+      document.getElementById('online-lobby-status').textContent = 'Room full — host can start';
+      if (State.online.isHost) {
+        const btn = document.getElementById('btn-start-online');
+        btn.disabled = false;
+        btn.textContent = 'Start Game';
+      }
+    });
+    window.multiplayerAPI.on('game:start', ({ players, settings, state }) => onlineGameStart(players, settings, state));
+    window.multiplayerAPI.on('state:update', ({ state, gameOver, winner }) => onlineStateUpdate(state, gameOver, winner));
+  }
+
+  setOnlineStatus('Connected');
+  return true;
+}
+
+async function onlineCreateRoom() {
+  const playerName = getOnlineName();
+  if (!playerName) return;
+  const ok = await onlineConnect();
+  if (!ok) return;
+
+  setOnlineStatus('Creating room…');
+  const result = await window.multiplayerAPI.emit('room:create', {
+    playerName,
+    playerCount: State.setup.playerCount,
+    boardSize: State.setup.boardSize,
+    timer: State.setup.timerDuration,
+  });
+  if (result.error) { setOnlineStatus(result.error, true); return; }
+
+  State.online.myPlayerIndex = 0;
+  State.online.roomCode = result.code;
+  State.online.isHost = true;
+  showOnlineLobby(result.code, result.players, State.setup.playerCount);
+}
+
+async function onlineJoinRoom() {
+  const playerName = getOnlineName();
+  if (!playerName) return;
+  const code = document.getElementById('online-join-code')?.value.trim().toUpperCase();
+  if (!code || code.length !== 5) { setOnlineStatus('Enter a 5-character code', true); return; }
+
+  const ok = await onlineConnect();
+  if (!ok) return;
+
+  setOnlineStatus('Joining…');
+  const result = await window.multiplayerAPI.emit('room:join', { playerName, code });
+  if (result.error) { setOnlineStatus(result.error, true); return; }
+
+  const me = result.players.find(p => p.name === playerName);
+  State.online.myPlayerIndex = me?.index ?? result.players.length - 1;
+  State.online.roomCode = code;
+  State.online.isHost = false;
+  showOnlineLobby(code, result.players, result.settings.playerCount);
+}
+
+function showOnlineLobby(code, players, totalSlots) {
+  document.getElementById('lobby-code-display').textContent = code;
+  updateOnlineLobbyPlayers(players, totalSlots);
+  document.getElementById('online-lobby-status').textContent = `${players.length} / ${totalSlots} players`;
+  document.getElementById('btn-start-online').disabled = true;
+  document.getElementById('btn-start-online').textContent = 'Waiting for players…';
+  document.getElementById('online-lobby').style.display = 'flex';
+}
+
+function updateOnlineLobbyPlayers(players, totalSlots) {
+  const ul = document.getElementById('online-lobby-players');
+  const slots = totalSlots ?? players.length;
+  ul.innerHTML = '';
+  players.forEach(p => {
+    const li = document.createElement('li');
+    li.style.cssText = 'display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;border-bottom:1px solid #ffffff0a';
+    const dot = `<span style="width:12px;height:12px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block"></span>`;
+    const host = p.isHost ? '<span style="font-size:0.7rem;padding:0.1rem 0.4rem;background:#0f3460;border-radius:4px;margin-left:auto">host</span>' : '';
+    li.innerHTML = `${dot}<span>${p.name}</span>${host}`;
+    ul.appendChild(li);
+  });
+  for (let i = players.length; i < slots; i++) {
+    const li = document.createElement('li');
+    li.style.cssText = 'display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;color:#555';
+    li.innerHTML = '<span style="width:12px;height:12px;border-radius:50%;background:#333;flex-shrink:0;display:inline-block"></span>waiting…';
+    ul.appendChild(li);
+  }
+}
+
+async function onlineStartGame() {
+  if (!State.online.isHost) return;
+  const result = await window.multiplayerAPI.emit('room:start', { code: State.online.roomCode });
+  if (result?.error) setOnlineStatus(result.error, true);
+}
+
+function onlineLeaveLobby() {
+  document.getElementById('online-lobby').style.display = 'none';
+  window.multiplayerAPI.disconnect();
+  State.online.active = false;
+  State.online.roomCode = null;
+  _onlineListenersRegistered = false;
+  setOnlineStatus('');
+}
+
+function applyServerState(serverState) {
+  const isMyTurn = serverState.currentPlayerIdx === State.online.myPlayerIndex;
+  State.game = {
+    board: serverState.board,
+    pegs: serverState.pegs,
+    players: serverState.players,
+    numPlayers: serverState.numPlayers,
+    currentPlayerIdx: serverState.currentPlayerIdx,
+    phase: serverState.phase,
+    selectedPegId: serverState.selectedPegId,
+    winner: serverState.winner,
+    validMoves: new Set(),
+    movesRemaining: 1,
+    pegsToMove: new Set(isMyTurn ? (serverState.players[serverState.currentPlayerIdx]?.pegIds ?? []) : []),
+    question: null,
+    combatData: null,
+    flagCaptureData: null,
+    pendingMove: null,
+    usedQ: {},
+  };
+}
+
+function onlineGameStart(serverPlayers, settings, serverState) {
+  document.getElementById('online-lobby').style.display = 'none';
+  State.online.active = true;
+
+  serverPlayers.forEach((p, i) => { State.playerColors[i] = p.color; });
+  State.setup.timerDuration = settings.timer ?? 30;
+  State.setup.boardSize = serverState.boardSize;
+  State.boardSize = serverState.boardSize;
+
+  applyServerState(serverState);
+
+  document.documentElement.style.setProperty('--ts', `calc(var(--bs) / ${State.boardSize})`);
+  State.DOM.board.style.setProperty('--board-cols', State.boardSize);
+  State.DOM.setupScreen.style.display = 'none';
+  State.DOM.gameScreen.style.display = 'flex';
+  State.dirty.board = true;
+  State.dirty.ui = true;
+  flushUpdates();
+}
+
+function onlineStateUpdate(serverState, gameOver, winner) {
+  if (!State.online.active) return;
+  applyServerState(serverState);
+  _movedPegs.clear();
+  State.dirty.allTiles = true;
+  State.dirty.ui = true;
+  flushUpdates();
+  if (gameOver) {
+    State.game.phase = PHASE.GAME_OVER;
+    setTimeout(() => { if (State.game) showGameOver(winner); }, 400);
+  }
+}
+
+function onOnlinePegClick(pegId) {
+  if (State.game.currentPlayerIdx !== State.online.myPlayerIndex) return;
+  if (State.game.phase !== PHASE.SELECT_PEG) return;
+  const myPlayer = State.game.players[State.online.myPlayerIndex];
+  if (!myPlayer?.pegIds.includes(pegId)) return;
+
+  window.multiplayerAPI.emit('action:select_peg', { code: State.online.roomCode, pegId })
+    .then(({ ok, error, validMoves }) => {
+      if (error || !ok) return;
+      State.game.selectedPegId = pegId;
+      State.game.phase = PHASE.SELECT_TILE;
+      State.game.validMoves = new Set(validMoves);
+      State.game.movesRemaining = 1;
+      renderAll();
+    });
+}
+
+function onOnlineTileClick(r, c) {
+  if (State.game.currentPlayerIdx !== State.online.myPlayerIndex) return;
+  if (State.game.phase !== PHASE.SELECT_TILE) return;
+  if (!State.game.selectedPegId) return;
+  if (!State.game.validMoves.has(r * COORD_BASE + c)) return;
+
+  window.multiplayerAPI.emit('action:select_tile', { code: State.online.roomCode, pegId: State.game.selectedPegId, r, c })
+    .then(({ ok, error, moveType, questions }) => {
+      if (error || !ok) return;
+      State.online.pendingMove = { pegId: State.game.selectedPegId, targetR: r, targetC: c, moveType };
+      State.online.pendingQuestions = questions;
+      State.online.pendingAnswers = [];
+      State.online.currentQIdx = 0;
+      const q = questions[0];
+      State.game.question = { ...q, a: -1 };
+      showQuestion(moveType === 'combat', moveType === 'combat' ? 1 : null, moveType === 'flag');
+    });
+}
+
+async function onlineSubmitTurn() {
+  const result = await window.multiplayerAPI.emit('turn:submit', {
+    code: State.online.roomCode,
+    submission: {
+      pegId: State.online.pendingMove.pegId,
+      targetR: State.online.pendingMove.targetR,
+      targetC: State.online.pendingMove.targetC,
+      answers: State.online.pendingAnswers,
+    },
+  });
+  if (result?.error) console.error('turn:submit error:', result.error);
+  State.online.pendingMove = null;
+  State.online.pendingQuestions = [];
+  State.online.pendingAnswers = [];
 }
 
 // Keyboard shortcuts for question modal
