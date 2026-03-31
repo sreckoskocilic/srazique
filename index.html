@@ -1903,11 +1903,42 @@ function movePegTo(pegId, r, c) {
 function pushPegAway(pegId) {
   const peg = State.game.pegs[pegId];
   if (!peg) return;
-  const adj = getAdjacentTiles(peg.row, peg.col).filter(p => State.game.board[p.r][p.c].pegId === null);
-  if (adj.length === 0) {
+  const { r: pegR, c: pegC } = peg;
+  
+  // Get attack direction from combatData
+  const [pushDr, pushDc] = State.game.combatData?.pushDir || [0, 0];
+  if (pushDr === 0 && pushDc === 0) {
     eliminatePeg(pegId);
-  } else {
-    movePegTo(pegId, adj[0].r, adj[0].c);
+    return;
+  }
+  
+  // Chain push: push all pegs in direction until empty space or off board
+  let pushedPegs = [pegId];
+  let curR = pegR + pushDr;
+  let curC = pegC + pushDc;
+  
+  while (curR >= 0 && curR < State.boardSize && curC >= 0 && curC < State.boardSize) {
+    const tile = State.game.board[curR][curC];
+    if (tile.pegId) {
+      pushedPegs.push(tile.pegId);
+      curR += pushDr;
+      curC += pushDc;
+    } else {
+      break;
+    }
+  }
+  
+  // If final position is off board, eliminate the last peg
+  if (curR < 0 || curR >= State.boardSize || curC < 0 || curC >= State.boardSize) {
+    const lastPegId = pushedPegs.pop();
+    eliminatePeg(lastPegId);
+  }
+  
+  // Move all pushed pegs one step in direction
+  for (let i = pushedPegs.length - 1; i >= 0; i--) {
+    const pid = pushedPegs[i];
+    const p = State.game.pegs[pid];
+    movePegTo(pid, p.row + pushDr, p.col + pushDc);
   }
 }
 
@@ -2004,9 +2035,13 @@ function onTileClick(r, c) {
 
   const destPeg = State.game.pegs[destPegId];
   if (destPegId && destPeg && destPeg.playerId !== State.game.currentPlayerIdx) {
+    const atkPeg = State.game.pegs[State.game.selectedPegId];
+    const dr = destPeg.row - atkPeg.row;
+    const dc = destPeg.col - atkPeg.col;
     State.game.combatData = {
       defendPegId: destPegId,
       destR: r, destC: c,
+      pushDir: [dr, dc],
     };
     State.game.phase = PHASE.COMBAT_Q1;
     const attackCat = tileCat(tile);
@@ -2223,13 +2258,13 @@ function handleCombatQ2(correct) {
   const defPeg = State.game.pegs[defPegId];
   if (!defPeg) { finishBattle(); checkEndGame(); renderAll(); return; }
 
-  const atkPeg = State.game.pegs[State.game.selectedPegId];
-  const rankWin = atkPeg && atkPeg.rank > defPeg.rank;
+  const defPeg = State.game.pegs[defPegId];
+  if (!defPeg) { finishBattle(); checkEndGame(); renderAll(); return; }
 
   if (correct) {
     rankUp(State.game.selectedPegId);
   }
-  if (correct || rankWin) {
+  if (correct) {
     if (defPeg.rank > 0) {
       rankDown(defPegId);
       pushPegAway(defPegId);
