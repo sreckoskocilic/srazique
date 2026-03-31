@@ -2258,12 +2258,6 @@ function handleCombatQ2(correct) {
   const defPeg = State.game.pegs[defPegId];
   if (!defPeg) { finishBattle(); checkEndGame(); renderAll(); return; }
 
-  const defPeg = State.game.pegs[defPegId];
-  if (!defPeg) { finishBattle(); checkEndGame(); renderAll(); return; }
-
-  if (correct) {
-    rankUp(State.game.selectedPegId);
-  }
   if (correct) {
     if (defPeg.rank > 0) {
       rankDown(defPegId);
