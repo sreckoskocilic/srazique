@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.socket.io; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://sraz.nbastables.com wss://sraz.nbastables.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';">
 <title>SRAZ — Clash</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1003,7 +1003,6 @@ body {
     <button onclick="showHelp()" aria-label="How to play">How to Play</button>
     <button onclick="toggleHighContrast()" aria-label="Toggle high contrast mode">High Contrast</button>
     <button onclick="toggleAdvancedSection()" id="btn-advanced" aria-label="Advanced settings">Settings</button>
-    <button onclick="toggleOnlineSection()" aria-label="Play Online">Play Online</button>
   </div>
 
   <div id="advanced-section" style="display:none">
@@ -1031,30 +1030,6 @@ body {
     </div>
   </div>
 
-  <div class="setup-section" id="online-section" style="display:none;margin-top:16px">
-    <h3>Online Multiplayer</h3>
-    <label for="online-name">Your name</label>
-    <input id="online-name" type="text" maxlength="16" placeholder="e.g. Kmet42" />
-    <button class="btn-primary" onclick="onlineCreateRoom()" style="margin-bottom:0.75rem">Create Room</button>
-    <div style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin:0.25rem 0 0.75rem">— or join —</div>
-    <div style="display:flex;gap:8px">
-      <input id="online-join-code" type="text" maxlength="5" placeholder="ROOM CODE" style="text-transform:uppercase;letter-spacing:0.2em;flex:1;margin-bottom:0" oninput="this.value=this.value.toUpperCase()" />
-      <button class="btn-primary" onclick="onlineJoinRoom()" style="flex:0 0 auto;width:auto;padding:0.6rem 1rem;margin-bottom:0">Join</button>
-    </div>
-    <div id="online-status" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.6rem;text-align:center;min-height:1.2em"></div>
-  </div>
-</div>
-
-<!-- ONLINE LOBBY OVERLAY -->
-<div id="online-lobby" style="position:fixed;inset:0;background:var(--bg-dark);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem">
-  <div style="background:var(--bg-card);border:2px solid var(--border);border-radius:12px;padding:2rem;width:100%;max-width:420px">
-    <p style="text-align:center;color:var(--text-muted);font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.25rem">Room Code</p>
-    <div id="lobby-code-display" style="text-align:center;font-size:2.5rem;font-weight:900;letter-spacing:0.3em;color:var(--primary);margin-bottom:1.5rem">-----</div>
-    <ul id="online-lobby-players" style="list-style:none;margin-bottom:1rem"></ul>
-    <div id="online-lobby-status" style="color:var(--text-muted);font-size:0.85rem;text-align:center;margin-bottom:1rem"></div>
-    <button class="btn-primary" id="btn-start-online" disabled onclick="onlineStartGame()" style="margin-bottom:0.5rem">Waiting for players…</button>
-    <button onclick="onlineLeaveLobby()" style="width:100%;padding:0.6rem;background:transparent;border:2px solid var(--border);border-radius:8px;color:var(--text-muted);cursor:pointer;font-size:0.9rem">Leave Room</button>
-  </div>
 </div>
 
 <!-- GAME -->
@@ -1155,63 +1130,6 @@ body {
 
 // Questions loaded by main.js (Electron) or loadQuestionsWeb() (browser)
 window.SRAZ_QUESTIONS = {};
-
-// ---------------------------------------------------------------------------
-// Web multiplayer shim — only created when preload.js hasn't provided the API
-// ---------------------------------------------------------------------------
-if (typeof window.multiplayerAPI === 'undefined') {
-  let _webSocket = null;
-  const _webHandlers = {};
-
-  async function _loadSocketIO() {
-    if (window.io) return;
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdn.socket.io/4.8.1/socket.io.min.js';
-      s.onload = resolve;
-      s.onerror = () => reject(new Error('Failed to load socket.io'));
-      document.head.appendChild(s);
-    });
-  }
-
-  window.multiplayerAPI = {
-    connect: async (url) => {
-      try {
-        await _loadSocketIO();
-        if (_webSocket) { _webSocket.disconnect(); _webSocket = null; }
-        const FORWARDED = [
-          'connect','disconnect','room:player_joined','room:player_left','room:full',
-          'game:start','game:question_start','state:update',
-        ];
-        return new Promise((resolve) => {
-          _webSocket = window.io(url, { transports: ['websocket'] });
-          _webSocket.once('connect', () => {
-            FORWARDED.forEach(evt => {
-              _webSocket.on(evt, data => (_webHandlers[evt] || []).forEach(h => h(data)));
-            });
-            resolve({ ok: true, id: _webSocket.id });
-          });
-          _webSocket.once('connect_error', err => resolve({ error: err.message }));
-          setTimeout(() => resolve({ error: 'Connection timeout' }), 8000);
-        });
-      } catch (e) {
-        return { error: e.message };
-      }
-    },
-    emit: (event, data) => {
-      if (!_webSocket?.connected) return Promise.resolve({ error: 'Not connected' });
-      return new Promise(resolve => _webSocket.emit(event, data, resolve));
-    },
-    on: (event, fn) => {
-      if (!_webHandlers[event]) _webHandlers[event] = [];
-      _webHandlers[event].push(fn);
-    },
-    disconnect: () => {
-      _webSocket?.disconnect();
-      _webSocket = null;
-    },
-  };
-}
 
 // ---------------------------------------------------------------------------
 // Web questions loading — fetch + XOR decrypt (mirrors main.js for Electron)
@@ -1578,21 +1496,8 @@ function loadQuestions() {
   if (State.questionsLoaded) return;
   const allQuestions = window.SRAZ_QUESTIONS || {};
 
-  // Calculate how many questions we need per category
-  // Max board is 10x10 = 100 tiles, each tile needs ~2-3 questions for variety
-  const boardSize = State.setup.boardSize || 10;
-  const tilesPerCategory = Math.ceil((boardSize * boardSize) / CATS.length);
-  const questionsPerCategory = Math.min(tilesPerCategory * 3, 50); // Max 50 per category
-
-  // Randomly select questions for each category
   for (const cat of CATS) {
-    const available = allQuestions[cat] || [];
-    if (available.length <= questionsPerCategory) {
-      State.questions[cat] = [...available];
-    } else {
-      // Shuffle and take needed amount
-      State.questions[cat] = available.sort(() => Math.random() - 0.5).slice(0, questionsPerCategory);
-    }
+    State.questions[cat] = [...(allQuestions[cat] || [])];
   }
 
   State.questionsLoaded = true;
@@ -1781,7 +1686,6 @@ function initGame(playerNames) {
     flagCaptureData: null,
     pendingMove: null,
     usedQ,
-    wrongQ: new Set(),
   };
 
   State.DOM.tiles = [];
@@ -1817,29 +1721,21 @@ function getValidMoves(pegId) {
 }
 
 function getQuestion(category) {
-  let cat = category;
-  if (!State.questions[cat]?.length) {
-    // Requested category is empty — try enabled categories before giving up
-    const fallback = State.setup.enabledCats.find(c => State.questions[c]?.length > 0);
-    if (!fallback) return null;
-    cat = fallback;
+  // Try requested category first, then fall back to other enabled categories.
+  // Never repeat a question within the same game.
+  const tryOrder = [category, ...State.setup.enabledCats.filter(c => c !== category)];
+  for (const cat of tryOrder) {
+    const pool = State.questions[cat];
+    if (!pool?.length) continue;
+    const usedSet = State.game.usedQ[cat];
+    const candidates = [];
+    for (let i = 0; i < pool.length; i++) if (!usedSet.has(i)) candidates.push(i);
+    if (candidates.length === 0) continue;
+    const idx = candidates[Math.floor(Math.random() * candidates.length)];
+    usedSet.add(idx);
+    return { ...pool[idx], category: cat };
   }
-  const pool = State.questions[cat];
-  if (!pool?.length) return null;
-  const usedSet = State.game.usedQ[cat];
-  const wrongIds = State.game.wrongQ;
-  if (usedSet.size >= pool.length) {
-    usedSet.clear();
-    for (let i = 0; i < pool.length; i++) {
-      if (wrongIds.has(pool[i].id)) usedSet.add(i);
-    }
-  }
-  let candidates = [];
-  for (let i = 0; i < pool.length; i++) if (!usedSet.has(i)) candidates.push(i);
-  if (candidates.length === 0) return null;
-  const idx = candidates[Math.floor(Math.random() * candidates.length)];
-  usedSet.add(idx);
-  return { ...pool[idx], category: cat };
+  return null;
 }
 
 
@@ -1999,7 +1895,6 @@ function selectPeg(pegId) {
 
 // ============================================================
 function onPegClick(pegId) {
-  if (State.online?.active) { onOnlinePegClick(pegId); return; }
   if (State.game.phase === PHASE.SELECT_TILE) {
     if (pegId === State.game.selectedPegId) {
       State.game.selectedPegId = null;
@@ -2019,7 +1914,6 @@ function onPegClick(pegId) {
 }
 
 function onTileClick(r, c) {
-  if (State.online?.active) { onOnlineTileClick(r, c); return; }
   if (State.game.phase !== PHASE.SELECT_TILE) return;
   const tile = State.game.board[r][c];
   const isValid = isValidMoveTarget(r, c);
@@ -2125,16 +2019,6 @@ function onAnswer(chosenIdx) {
   if (!q) return;
   stopTimer(); // Stop timer on answer
 
-  if (State.online?.active) {
-    State.DOM.modalOptionBtns.forEach((btn, i) => {
-      btn.disabled = true;
-      if (i === chosenIdx) btn.classList.add('chosen');
-    });
-    State.DOM.modalContinueWrap.style.display = 'block';
-    State.online.pendingAnswers.push({ questionId: q.id, answerIdx: chosenIdx });
-    return;
-  }
-
   const correct = chosenIdx === q.a;
 
   State.DOM.modalOptionBtns.forEach((btn, i) => {
@@ -2156,26 +2040,8 @@ const QUESTION_HANDLERS = {
 function continueAfterQuestion() {
   if (!State.game) return;
 
-  if (State.online?.active) {
-    State.DOM.modalOverlay.classList.remove('visible');
-    const nextIdx = State.online.currentQIdx + 1;
-    if (nextIdx < State.online.pendingQuestions.length) {
-      State.online.currentQIdx = nextIdx;
-      const q = State.online.pendingQuestions[nextIdx];
-      State.game.question = { ...q, a: -1 };
-      const mt = State.online.pendingMove.moveType;
-      showQuestion(mt === 'combat', nextIdx + 1, mt === 'flag');
-    } else {
-      onlineSubmitTurn();
-    }
-    return;
-  }
-
   const correct = _lastAnswerCorrect;
   const phase = State.game.phase;
-  if (!correct && State.game.question?.id) {
-    State.game.wrongQ.add(State.game.question.id);
-  }
   const cp = State.game.players[State.game.currentPlayerIdx];
   if (cp) {
     cp.stats.attempts++;
@@ -2532,11 +2398,7 @@ function flushUIUpdates() {
   let phaseText = '';
   if (State.game.phase === PHASE.SELECT_PEG) {
     const count = State.game.pegsToMove.size;
-    if (State.online?.active && count === 0) {
-      phaseText = `Waiting for ${cp.name}…`;
-    } else {
-      phaseText = `Select a peg (${count} remaining)`;
-    }
+    phaseText = `Select a peg (${count} remaining)`;
   } else if (State.game.phase === PHASE.SELECT_TILE) {
     const peg = State.game.pegs[State.game.selectedPegId];
     if (peg) {
@@ -2721,267 +2583,11 @@ function handleBoardEnter() {
   return false;
 }
 
-// ============================================================
-// ONLINE MULTIPLAYER
-// ============================================================
-
-State.online = {
-  active: false,
-  myPlayerIndex: null,
-  roomCode: null,
-  isHost: false,
-  pendingMove: null,
-  pendingQuestions: [],
-  pendingAnswers: [],
-  currentQIdx: 0,
-};
-
-const SRAZ_SERVER = 'https://sraz.nbastables.com';
-
 function toggleAdvancedSection() {
   const s = document.getElementById('advanced-section');
   const open = s.style.display === 'none';
   s.style.display = open ? 'block' : 'none';
   document.getElementById('btn-advanced').classList.toggle('active', open);
-}
-
-function toggleOnlineSection() {
-  const s = document.getElementById('online-section');
-  s.style.display = s.style.display === 'none' ? 'block' : 'none';
-}
-
-function setOnlineStatus(msg, isError) {
-  const el = document.getElementById('online-status');
-  if (el) { el.textContent = msg; el.style.color = isError ? 'var(--primary)' : 'var(--text-muted)'; }
-}
-
-function getOnlineName() {
-  const name = document.getElementById('online-name')?.value.trim();
-  if (!name) { setOnlineStatus('Enter your name first', true); return null; }
-  return name;
-}
-
-let _onlineListenersRegistered = false;
-
-async function onlineConnect() {
-  setOnlineStatus('Connecting…');
-  const result = await window.multiplayerAPI.connect(SRAZ_SERVER);
-  if (result.error) { setOnlineStatus(result.error, true); return false; }
-
-  if (!_onlineListenersRegistered) {
-    _onlineListenersRegistered = true;
-    window.multiplayerAPI.on('room:player_joined', ({ players }) => updateOnlineLobbyPlayers(players));
-    window.multiplayerAPI.on('room:player_left', ({ players, playerName }) => {
-      updateOnlineLobbyPlayers(players);
-      document.getElementById('online-lobby-status').textContent = `${playerName} left`;
-    });
-    window.multiplayerAPI.on('room:full', ({ players }) => {
-      updateOnlineLobbyPlayers(players);
-      document.getElementById('online-lobby-status').textContent = 'Room full — host can start';
-      if (State.online.isHost) {
-        const btn = document.getElementById('btn-start-online');
-        btn.disabled = false;
-        btn.textContent = 'Start Game';
-      }
-    });
-    window.multiplayerAPI.on('game:start', ({ players, settings, state }) => onlineGameStart(players, settings, state));
-    window.multiplayerAPI.on('state:update', ({ state, gameOver, winner }) => onlineStateUpdate(state, gameOver, winner));
-  }
-
-  setOnlineStatus('Connected');
-  return true;
-}
-
-async function onlineCreateRoom() {
-  const playerName = getOnlineName();
-  if (!playerName) return;
-  const ok = await onlineConnect();
-  if (!ok) return;
-
-  setOnlineStatus('Creating room…');
-  const result = await window.multiplayerAPI.emit('room:create', {
-    playerName,
-    playerCount: State.setup.playerCount,
-    boardSize: State.setup.boardSize,
-    timer: State.setup.timerDuration,
-  });
-  if (result.error) { setOnlineStatus(result.error, true); return; }
-
-  State.online.myPlayerIndex = 0;
-  State.online.roomCode = result.code;
-  State.online.isHost = true;
-  showOnlineLobby(result.code, result.players, State.setup.playerCount);
-}
-
-async function onlineJoinRoom() {
-  const playerName = getOnlineName();
-  if (!playerName) return;
-  const code = document.getElementById('online-join-code')?.value.trim().toUpperCase();
-  if (!code || code.length !== 5) { setOnlineStatus('Enter a 5-character code', true); return; }
-
-  const ok = await onlineConnect();
-  if (!ok) return;
-
-  setOnlineStatus('Joining…');
-  const result = await window.multiplayerAPI.emit('room:join', { playerName, code });
-  if (result.error) { setOnlineStatus(result.error, true); return; }
-
-  const me = result.players.find(p => p.name === playerName);
-  State.online.myPlayerIndex = me?.index ?? result.players.length - 1;
-  State.online.roomCode = code;
-  State.online.isHost = false;
-  showOnlineLobby(code, result.players, result.settings.playerCount);
-}
-
-function showOnlineLobby(code, players, totalSlots) {
-  document.getElementById('lobby-code-display').textContent = code;
-  updateOnlineLobbyPlayers(players, totalSlots);
-  document.getElementById('online-lobby-status').textContent = `${players.length} / ${totalSlots} players`;
-  document.getElementById('btn-start-online').disabled = true;
-  document.getElementById('btn-start-online').textContent = 'Waiting for players…';
-  document.getElementById('online-lobby').style.display = 'flex';
-}
-
-function updateOnlineLobbyPlayers(players, totalSlots) {
-  const ul = document.getElementById('online-lobby-players');
-  const slots = totalSlots ?? players.length;
-  ul.innerHTML = '';
-  players.forEach(p => {
-    const li = document.createElement('li');
-    li.style.cssText = 'display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;border-bottom:1px solid #ffffff0a';
-    const dot = `<span style="width:12px;height:12px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block"></span>`;
-    const host = p.isHost ? '<span style="font-size:0.7rem;padding:0.1rem 0.4rem;background:#0f3460;border-radius:4px;margin-left:auto">host</span>' : '';
-    li.innerHTML = `${dot}<span>${p.name}</span>${host}`;
-    ul.appendChild(li);
-  });
-  for (let i = players.length; i < slots; i++) {
-    const li = document.createElement('li');
-    li.style.cssText = 'display:flex;align-items:center;gap:0.6rem;padding:0.4rem 0;color:#555';
-    li.innerHTML = '<span style="width:12px;height:12px;border-radius:50%;background:#333;flex-shrink:0;display:inline-block"></span>waiting…';
-    ul.appendChild(li);
-  }
-}
-
-async function onlineStartGame() {
-  if (!State.online.isHost) return;
-  const result = await window.multiplayerAPI.emit('room:start', { code: State.online.roomCode });
-  if (result?.error) setOnlineStatus(result.error, true);
-}
-
-function onlineLeaveLobby() {
-  document.getElementById('online-lobby').style.display = 'none';
-  window.multiplayerAPI.disconnect();
-  State.online.active = false;
-  State.online.roomCode = null;
-  _onlineListenersRegistered = false;
-  setOnlineStatus('');
-}
-
-function applyServerState(serverState) {
-  const isMyTurn = serverState.currentPlayerIdx === State.online.myPlayerIndex;
-  State.game = {
-    board: serverState.board,
-    pegs: serverState.pegs,
-    players: serverState.players,
-    numPlayers: serverState.numPlayers,
-    currentPlayerIdx: serverState.currentPlayerIdx,
-    phase: serverState.phase,
-    selectedPegId: serverState.selectedPegId,
-    winner: serverState.winner,
-    validMoves: new Set(),
-    movesRemaining: 1,
-    pegsToMove: new Set(isMyTurn ? (serverState.players[serverState.currentPlayerIdx]?.pegIds ?? []) : []),
-    question: null,
-    combatData: null,
-    flagCaptureData: null,
-    pendingMove: null,
-    usedQ: {},
-  };
-}
-
-function onlineGameStart(serverPlayers, settings, serverState) {
-  document.getElementById('online-lobby').style.display = 'none';
-  State.online.active = true;
-
-  serverPlayers.forEach((p, i) => { State.playerColors[i] = p.color; });
-  State.setup.timerDuration = settings.timer ?? 30;
-  State.setup.boardSize = serverState.boardSize;
-  State.boardSize = serverState.boardSize;
-
-  applyServerState(serverState);
-
-  document.documentElement.style.setProperty('--ts', `calc(var(--bs) / ${State.boardSize})`);
-  State.DOM.board.style.setProperty('--board-cols', State.boardSize);
-  State.DOM.setupScreen.style.display = 'none';
-  State.DOM.gameScreen.style.display = 'flex';
-  State.dirty.board = true;
-  State.dirty.ui = true;
-  flushUpdates();
-}
-
-function onlineStateUpdate(serverState, gameOver, winner) {
-  if (!State.online.active) return;
-  applyServerState(serverState);
-  _movedPegs.clear();
-  State.dirty.allTiles = true;
-  State.dirty.ui = true;
-  flushUpdates();
-  if (gameOver) {
-    State.game.phase = PHASE.GAME_OVER;
-    setTimeout(() => { if (State.game) showGameOver(winner); }, 400);
-  }
-}
-
-function onOnlinePegClick(pegId) {
-  if (State.game.currentPlayerIdx !== State.online.myPlayerIndex) return;
-  if (State.game.phase !== PHASE.SELECT_PEG) return;
-  const myPlayer = State.game.players[State.online.myPlayerIndex];
-  if (!myPlayer?.pegIds.includes(pegId)) return;
-
-  window.multiplayerAPI.emit('action:select_peg', { code: State.online.roomCode, pegId })
-    .then(({ ok, error, validMoves }) => {
-      if (error || !ok) return;
-      State.game.selectedPegId = pegId;
-      State.game.phase = PHASE.SELECT_TILE;
-      State.game.validMoves = new Set(validMoves);
-      State.game.movesRemaining = 1;
-      renderAll();
-    });
-}
-
-function onOnlineTileClick(r, c) {
-  if (State.game.currentPlayerIdx !== State.online.myPlayerIndex) return;
-  if (State.game.phase !== PHASE.SELECT_TILE) return;
-  if (!State.game.selectedPegId) return;
-  if (!State.game.validMoves.has(r * COORD_BASE + c)) return;
-
-  window.multiplayerAPI.emit('action:select_tile', { code: State.online.roomCode, pegId: State.game.selectedPegId, r, c })
-    .then(({ ok, error, moveType, questions }) => {
-      if (error || !ok) return;
-      State.online.pendingMove = { pegId: State.game.selectedPegId, targetR: r, targetC: c, moveType };
-      State.online.pendingQuestions = questions;
-      State.online.pendingAnswers = [];
-      State.online.currentQIdx = 0;
-      const q = questions[0];
-      State.game.question = { ...q, a: -1 };
-      showQuestion(moveType === 'combat', moveType === 'combat' ? 1 : null, moveType === 'flag');
-    });
-}
-
-async function onlineSubmitTurn() {
-  const result = await window.multiplayerAPI.emit('turn:submit', {
-    code: State.online.roomCode,
-    submission: {
-      pegId: State.online.pendingMove.pegId,
-      targetR: State.online.pendingMove.targetR,
-      targetC: State.online.pendingMove.targetC,
-      answers: State.online.pendingAnswers,
-    },
-  });
-  if (result?.error) console.error('turn:submit error:', result.error);
-  State.online.pendingMove = null;
-  State.online.pendingQuestions = [];
-  State.online.pendingAnswers = [];
 }
 
 // Keyboard shortcuts for question modal

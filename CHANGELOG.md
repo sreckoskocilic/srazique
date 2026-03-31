@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-03-31
+
+### Changed
+
+- Questions no longer repeat within the same game — full question pool loaded from `questions.enc` with no per-category cap
+- Removed online multiplayer — socket.io bridge, lobby UI, and all online game logic removed from app
+
+### Fixed
+
+- Multiplayer socket left alive on connection timeout or error — now properly disconnected in both cases
+
 ## [1.0.3] - 2026-03-29
 
 ### Added

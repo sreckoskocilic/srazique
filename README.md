@@ -6,11 +6,9 @@
 ![Language](https://img.shields.io/github/languages/top/sreckoskocilic/srazique)
 ![Code Size](https://img.shields.io/github/languages/code-size/sreckoskocilic/srazique)
 
-A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Srazique brings back the original gameplay with updated visuals and multiplayer support, built with Electron.
+A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Srazique brings back the original gameplay with updated visuals, built with Electron.
 
 This project was born out of a deep passion for quiz games and countless hours spent playing the original Sraz with friends — until we had memorized every question and started longing for a fresh set. Rather than just updating the question bank, I decided to rebuild the whole thing from scratch.
-
-This version features **8,600+ unique questions** across 10 categories, sourced by scraping pub quiz sets, Wikipedia, encyclopedias, and schoolbooks — prioritizing reliability and accuracy over quantity.
 
 > For the best overview of the original 1993 DOS game, see: [Sraz (1993) — prvi domaći kviz znanja na računalu koji je spojio igru i učenje](https://virus.hr/en/sraz-1993-prvi-domaci-kviz-znanja-na-racunalu-koji-je-spojio-igru-i-ucenje/)
 
@@ -24,13 +22,11 @@ This version features **8,600+ unique questions** across 10 categories, sourced 
 
 - 2-4 player local multiplayer
 - 4x4, 8x8, or 10x10 game board with category-based tiles
-- Massive trivia bank (10 categories including Art, Geography, History, Science, and more)
+- 8,600+ unique questions across 10 categories — no repeats within a game
 - Combat system with rank progression — higher rank wins regardless of answer
 - Flag capture mechanics
 - Countdown timer per answer (15, 30, or 45 seconds)
 - Keyboard navigation (A/B/C/D or 1/2/3/4 for answers, arrow keys for board)
-- Online multiplayer via dedicated server
-- Runs in a web browser — same engine as the desktop app
 
 ## Installation
 
@@ -38,7 +34,6 @@ Download the latest release for your platform from the [Releases](../../releases
 
 - **Windows** — download and run `Srazique_Setup.exe`
 - **macOS** — download and open the `.dmg` file, then drag Srazique to your Applications folder
-- **Web** — open in any modern browser (questions and multiplayer load automatically)
 
 ## License
 

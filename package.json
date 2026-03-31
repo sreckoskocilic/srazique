@@ -1,7 +1,7 @@
 {
   "name": "srazique",
   "productName": "Srazique",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Sraz Rebirth - Strategic board game",
   "main": "main.js",
   "scripts": {
@@ -22,8 +22,7 @@
     "game",
     "board-game",
     "strategy",
-    "electron",
-    "multiplayer"
+    "electron"
   ],
   "author": "Srecko Skocilic",
   "license": "MIT",
@@ -37,7 +36,6 @@
     "electron-builder": "26.8.1",
     "eslint": "10.1.0",
     "eslint-plugin-html": "^8.1.4",
-    "javascript-obfuscator": "5.4.1",
     "prettier": "^3.4.0",
     "vitest": "^4.1.0",
     "vm2": "^3.10.5"
@@ -115,7 +113,5 @@
     "compression": "maximum",
     "npmRebuild": false
   },
-  "dependencies": {
-    "socket.io-client": "^4.8.3"
-  }
+  "dependencies": {}
 }

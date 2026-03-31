@@ -1,51 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { io: socketIO } = require('socket.io-client');
 
 let logFile = null;
 let win = null;
-let _socket = null;
-
-// ---------------------------------------------------------------------------
-// Multiplayer socket bridge (IPC → socket.io-client in main process)
-// ---------------------------------------------------------------------------
-
-const FORWARDED_EVENTS = [
-  'connect', 'disconnect',
-  'room:player_joined', 'room:player_left', 'room:full',
-  'game:start', 'game:question_start', 'state:update',
-];
-
-ipcMain.handle('mp:connect', async (_e, url) => {
-  if (_socket) { _socket.disconnect(); _socket = null; }
-  return new Promise((resolve) => {
-    _socket = socketIO(url, { transports: ['websocket'] });
-
-    _socket.once('connect', () => {
-      FORWARDED_EVENTS.forEach(evt => {
-        _socket.on(evt, data => win?.webContents.send('mp:event', evt, data));
-      });
-      resolve({ ok: true, id: _socket.id });
-    });
-
-    _socket.once('connect_error', err => {
-      resolve({ error: err.message });
-    });
-
-    setTimeout(() => resolve({ error: 'Connection timeout' }), 8000);
-  });
-});
-
-ipcMain.handle('mp:emit', async (_e, event, data) => {
-  if (!_socket?.connected) {return { error: 'Not connected' };}
-  return new Promise(resolve => _socket.emit(event, data, resolve));
-});
-
-ipcMain.handle('mp:disconnect', async () => {
-  _socket?.disconnect();
-  _socket = null;
-});
 
 function log(level, ...args) {
   const timestamp = new Date().toISOString();
