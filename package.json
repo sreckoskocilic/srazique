@@ -1,7 +1,7 @@
 {
   "name": "srazique",
   "productName": "Srazique",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Sraz Rebirth - Strategic board game",
   "main": "main.js",
   "scripts": {
