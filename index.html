@@ -1122,7 +1122,7 @@ async function loadQuestionsWeb() {
   // Skip in Electron — main.js handles injection
   if (typeof window.electronAPI !== 'undefined') return;
   try {
-    const resp = await fetch('questions.enc');
+    const resp = await fetch('questions.enc', { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const b64 = await resp.text();
 
@@ -1202,6 +1202,7 @@ const State = {
   questions: {},
   questionsLoaded: false,
   timer: { intervalId: null, remaining: 0, total: 0, running: false },
+  modalContinueVisible: false,
   navCursor: { row: 0, col: 0 },
 
   DOM: {
@@ -1269,9 +1270,11 @@ function showColorPicker(playerIndex, button) {
   picker.className = 'player-color-picker show';
   picker.innerHTML = COLOR_OPTIONS.map(color =>
     `<div class="color-option ${State.playerColors[playerIndex] === color ? 'selected' : ''}"
-          style="background:${color}" data-color="${color}"
-          onclick="selectColor(${playerIndex}, '${color}')"></div>`
+          style="background:${color}" data-color="${color}"></div>`
   ).join('');
+  picker.querySelectorAll('.color-option').forEach(opt => {
+    opt.onclick = () => selectColor(playerIndex, opt.dataset.color, button);
+  });
 
   const rect = button.getBoundingClientRect();
   picker.style.left = rect.left + 'px';
@@ -1279,22 +1282,17 @@ function showColorPicker(playerIndex, button) {
 
   document.body.appendChild(picker);
 
-  setTimeout(() => {
-    document.addEventListener('click', function closePicker(e) {
-      if (!picker.contains(e.target) && e.target !== button) {
-        picker.remove();
-        document.removeEventListener('click', closePicker);
-      }
-    });
-  }, 10);
+  document.addEventListener('click', function closePicker(e) {
+    if (!picker.contains(e.target) && e.target !== button) {
+      picker.remove();
+      document.removeEventListener('click', closePicker, { capture: true });
+    }
+  }, { capture: true });
 }
 
-function selectColor(playerIndex, color) {
+function selectColor(playerIndex, color, dot) {
   State.playerColors[playerIndex] = color;
-  const dots = document.querySelectorAll('.player-color-dot');
-  if (dots[playerIndex]) {
-    dots[playerIndex].style.background = color;
-  }
+  if (dot) dot.style.background = color;
   document.querySelectorAll('.player-color-picker').forEach(p => p.remove());
 }
 
@@ -1304,13 +1302,11 @@ function toggleHighContrast() {
 }
 
 function showHelp() {
-  const modal = document.getElementById('help-modal');
-  if (modal) modal.classList.add('show');
+  State.DOM.helpModal?.classList.add('show');
 }
 
 function closeHelp() {
-  const modal = document.getElementById('help-modal');
-  if (modal) modal.classList.remove('show');
+  State.DOM.helpModal?.classList.remove('show');
 }
 
 // Sound Effects using Web Audio API
@@ -1687,6 +1683,7 @@ function getEligiblePegs() {
 }
 
 function getValidMoves(pegId) {
+  if (!State.game) return [];
   const peg = State.game.pegs[pegId];
   if (!peg) return [];
   return getAdjacentTiles(peg.row, peg.col).filter(({r, c}) => {
@@ -1722,14 +1719,13 @@ function rankUp(pegId) {
   if (peg.rank < 2) {
     peg.rank++;
     peg.correct = 0;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const el = State.DOM.pegs.get(pegId);
-      if (el) {
-        el.classList.remove('rank-up-flash');
-        void el.offsetWidth;
-        el.classList.add('rank-up-flash');
-      }
-    }));
+    const el = State.DOM.pegs.get(pegId);
+    if (el) {
+      el.classList.remove('rank-up-flash');
+      void el.offsetWidth;
+      el.classList.add('rank-up-flash');
+      el.addEventListener('animationend', () => el.classList.remove('rank-up-flash'), { once: true });
+    }
   }
 }
 
@@ -1739,14 +1735,13 @@ function rankDown(pegId) {
   if (peg.rank > 0) {
     peg.rank--;
     peg.correct = 0;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const el = State.DOM.pegs.get(pegId);
-      if (el) {
-        el.classList.remove('rank-down-flash');
-        void el.offsetWidth;
-        el.classList.add('rank-down-flash');
-      }
-    }));
+    const el = State.DOM.pegs.get(pegId);
+    if (el) {
+      el.classList.remove('rank-down-flash');
+      void el.offsetWidth;
+      el.classList.add('rank-down-flash');
+      el.addEventListener('animationend', () => el.classList.remove('rank-down-flash'), { once: true });
+    }
     return false;
   }
   return true;
@@ -1854,6 +1849,7 @@ function advanceTurn() {
 function showTurnAnnounce(player) {
   const el = State.DOM.turnAnnounce;
   if (!el) return;
+  el.classList.remove('visible');
   State.DOM.turnAnnounceName.textContent = player.name;
   State.DOM.turnAnnounceName.style.color = player.color;
   el.classList.add('visible');
@@ -1984,6 +1980,7 @@ function showQuestion(isCombat, combatQNum, isFlagCapture) {
   State.DOM.modalOptionBtns = optBtns;
 
   State.DOM.modalContinueWrap.style.display = 'none';
+  State.modalContinueVisible = false;
   State.DOM.modalOverlay.classList.add('visible');
   // Start timer - auto-fail on timeout
   startTimer(() => onAnswer(-1));
@@ -2004,6 +2001,7 @@ function onAnswer(chosenIdx) {
   });
 
   State.DOM.modalContinueWrap.style.display = 'block';
+  State.modalContinueVisible = true;
   _lastAnswerCorrect = correct;
 }
 
@@ -2029,6 +2027,7 @@ function continueAfterQuestion() {
 }
 
 function handleNormalMove(correct) {
+  if (!State.game) return;
   if (!State.game?.pendingMove || State.game.selectedPegId === null) return;
   const peg = State.game.pegs[State.game.selectedPegId];
   if (!peg) { finishPegMove(); renderAll(); return; }
@@ -2148,6 +2147,7 @@ function checkEndGame() {
 
 function showGameOver(winnerIdx) {
   if (!State.game) return;
+  stopTimer();
   State.DOM.gameScreen.style.display = 'none';
   const winner = State.game.players[winnerIdx];
   if (!winner) return;
@@ -2158,6 +2158,7 @@ function showGameOver(winnerIdx) {
 }
 
 function quitGame() {
+  stopTimer();
   State.DOM.gameScreen.style.display = 'none';
   resetGame();
 }
@@ -2430,6 +2431,7 @@ try {
   State.DOM.modalQuestion   = document.getElementById('modal-question');
   State.DOM.modalOptions    = document.getElementById('modal-options');
   State.DOM.modalContinueWrap= document.getElementById('modal-continue-wrap');
+  State.DOM.helpModal       = document.getElementById('help-modal');
   State.DOM.turnPlayerName  = document.getElementById('turn-player-name');
   State.DOM.phaseText       = document.getElementById('phase-text');
   State.DOM.setupScreen     = document.getElementById('setup-screen');
@@ -2538,7 +2540,7 @@ function highlightNavCursor() {
 
 function handleModalEnter() {
   const overlay = State.DOM.modalOverlay;
-  if (overlay.classList.contains('visible') && State.DOM.modalContinueWrap.style.display !== 'none') {
+  if (overlay.classList.contains('visible') && State.modalContinueVisible) {
     continueAfterQuestion();
     return true;
   }

@@ -140,8 +140,12 @@ describe('Security Configuration', () => {
     expect(hasNodeIntegration).toBe(false);
   });
 
-  it('should check isPackaged before adding security handlers', () => {
-    expect(mainJs).toContain('app.isPackaged');
+  it('security handlers are unconditionally active (not isPackaged-gated)', () => {
+    expect(mainJs).toContain('will-navigate');
+    expect(mainJs).toContain("action: 'deny'");
+    // Handlers must not be nested inside an isPackaged block (no } between isPackaged and the handler means it's inside)
+    expect(mainJs).not.toMatch(/isPackaged[^}]*will-navigate/);
+    expect(mainJs).not.toMatch(/isPackaged[^}]*setWindowOpenHandler/);
   });
 
   it('should deny window open in packaged app', () => {

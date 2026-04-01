@@ -16,7 +16,9 @@ function log(level, ...args) {
   if (logFile) {
     try {
       fs.appendFileSync(logFile, msg);
-    } catch {}
+    } catch (e) {
+      log('WARN', 'Failed to write to log file:', e.message);
+    }
   }
 }
 
@@ -38,7 +40,9 @@ function loadWindowState() {
     if (fs.existsSync(windowStateFile)) {
       return JSON.parse(fs.readFileSync(windowStateFile, 'utf8'));
     }
-  } catch {}
+  } catch (e) {
+    log('WARN', 'Failed to read window state:', e.message);
+  }
   return { width: 900, height: 900, x: undefined, y: undefined };
 }
 
@@ -48,7 +52,9 @@ function saveWindowState(win) {
   }
   try {
     fs.writeFileSync(windowStateFile, JSON.stringify(win.getBounds()));
-  } catch {}
+  } catch (e) {
+    log('WARN', 'Failed to save window state:', e.message);
+  }
 }
 
 function createWindow() {
@@ -99,8 +105,14 @@ function createWindow() {
   });
 
   let saveStateTimer = null;
-  const debouncedSave = () => { clearTimeout(saveStateTimer); saveStateTimer = setTimeout(() => saveWindowState(win), 500); };
-  win.on('close', () => saveWindowState(win));
+  const debouncedSave = () => {
+    clearTimeout(saveStateTimer);
+    saveStateTimer = setTimeout(() => saveWindowState(win), 500);
+  };
+  win.on('close', () => {
+    clearTimeout(saveStateTimer);
+    saveWindowState(win);
+  });
   win.on('resize', debouncedSave);
   win.on('move', debouncedSave);
   win.once('ready-to-show', () => win.show());

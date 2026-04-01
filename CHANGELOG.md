@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-04-01
+
+### Fixed
+
+- Timer left running after quitting or reaching game-over — `stopTimer()` now called in both `quitGame()` and `showGameOver()`
+- Color picker close listener had a 10ms `setTimeout` race condition — replaced with capture-phase event listener; `once: true` was subsequently removed to prevent stuck-open picker when clicking inside padding
+- Turn announce animation could stack if triggered in rapid succession — `visible` class is now removed before re-adding
+- `handleModalEnter` compared `display` style string to detect continue button visibility — replaced with `State.modalContinueVisible` boolean
+- `rankUp` / `rankDown` used double-`requestAnimationFrame` to reset animation class — replaced with `animationend` listener
+- `getValidMoves` and `handleNormalMove` could throw during async teardown — now guard against `null` `State.game`
+- `saveStateTimer` was not cleared on window close — debounce callback could fire after the window was destroyed
+- `main.js` catch blocks silently swallowed errors — now log at WARN level
+- `loadQuestionsWeb` fetch had no timeout — now uses `AbortSignal.timeout(10000)`
+
+### Changed
+
+- `selectColor` takes the dot element as a parameter instead of scanning with `querySelectorAll`
+- `showHelp` / `closeHelp` use cached `State.DOM.helpModal` ref instead of `getElementById` on every call
+- Restored missing `start` script (`npm start` now works again)
+
 ## [1.0.5] - 2026-03-31
 
 ### Changed
