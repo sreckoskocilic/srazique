@@ -2,7 +2,7 @@ const html = require('eslint-plugin-html');
 
 module.exports = [
   {
-    ignores: ['dist/', 'node_modules/', 'index.html'],
+    ignores: ['dist/', 'node_modules/'],
   },
   {
     files: ['**/*.js'],
@@ -22,7 +22,7 @@ module.exports = [
     },
     rules: {
       'no-unused-vars': 'error',
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-console': ['error', { allow: ['log', 'warn', 'error'] }],
       'no-var': 'error',
       'prefer-const': 'error',
       eqeqeq: ['error', 'always'],
@@ -34,13 +34,34 @@ module.exports = [
     },
   },
   {
-    files: ['tests/fixtures/**/*.html'],
-    plugins: {
-      html,
+    files: ['index.html'],
+    plugins: { html },
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'script',
+      globals: {
+        document: 'readonly',
+        window: 'readonly',
+        console: 'readonly',
+        fetch: 'readonly',
+        localStorage: 'readonly',
+        requestAnimationFrame: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        AudioContext: 'readonly',
+        AbortSignal: 'readonly',
+        navigator: 'readonly',
+        URL: 'readonly',
+      },
     },
     rules: {
-      'no-unused-vars': 'error',
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      // Functions invoked from inline onclick attributes appear unused to static analysis
+      'no-unused-vars': 'off',
+      'no-console': ['error', { allow: ['log', 'warn', 'error'] }],
+      'no-var': 'error',
+      eqeqeq: ['error', 'always'],
     },
   },
 ];

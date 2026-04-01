@@ -5,9 +5,9 @@
   "description": "Sraz Rebirth - Strategic board game",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "lint": "eslint main.js scripts/",
-    "lint:fix": "eslint main.js scripts/ --fix",
+    "dev": "electron .",
+    "lint": "eslint main.js scripts/ index.html",
+    "lint:fix": "eslint main.js scripts/ index.html --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

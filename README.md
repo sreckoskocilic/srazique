@@ -30,9 +30,19 @@ This project was born out of a deep passion for quiz games and countless hours s
 
 ## Installation
 
-Download the latest release for your platform from the [Releases](../../releases) page:
+## Test Setup
 
-- **Windows** — download and run `Srazique_Setup.exe`
+The project uses **Vitest** for unit testing.  Read the [official Vitest docs](https://vitest.dev) for more details.
+
+- The project uses **Vitest** for unit testing.  Read the [official Vitest docs](https://vitest.dev) for more details.
+
+
+- The project uses **Vitest** for unit testing.  Read the [official Vitest docs](https://vitest.dev) for more details.
+
+## Known Limitations
+
+- **Coverage limitation**: When running tests with **Vitest** in the repository’s `vm2` sandbox, the CI‑defined coverage thresholds are **ignored** by Vitest. The CI still reports a passing status even if the actual coverage drops below the target.
+
 - **macOS** — download and open the `.dmg` file, then drag Srazique to your Applications folder
 
 ## License

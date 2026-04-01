@@ -4,7 +4,7 @@ import path from 'path';
 import { VM } from 'vm2';
 
 const PROJECT_ROOT = process.cwd();
-const CLEAN_HTML_PATH = path.join(PROJECT_ROOT, 'tests', 'fixtures', 'index.clean.html');
+const CLEAN_HTML_PATH = path.join(PROJECT_ROOT, 'index.html');
 const CLEAN_HTML = fs.existsSync(CLEAN_HTML_PATH) ? fs.readFileSync(CLEAN_HTML_PATH, 'utf8') : null;
 
 const SCRIPT_MATCH = CLEAN_HTML ? CLEAN_HTML.match(/<script>([\s\S]*?)<\/script>/) : null;
@@ -60,8 +60,8 @@ function createGameContext() {
     (function() {
       ${GAME_CODE}
       return {
-        State, PHASE, CATS, RANK_UP_THRESHOLD, PLAYER_COLORS, COORD_BASE,
-        shuffle, cleanHtml, convertTriviaQ,
+        State, PHASE, CATS, PLAYER_COLORS, COORD_BASE,
+        shuffle,
         checkWinCondition, rankUp, rankDown,
         getQuestion, getValidMoves, eliminatePeg, movePegTo,
         getAdjacentTiles, randomCat,
@@ -76,7 +76,7 @@ function createGameContext() {
 describeGame('Game Constants', () => {
   it('should have PLAYER_COLORS with 4 colors', () => {
     expect(GAME_CODE).toContain('const PLAYER_COLORS');
-    expect(GAME_CODE).toContain("'#E53935'");
+    expect(GAME_CODE).toContain("'#FF4444'");
     expect(GAME_CODE).toContain("'#1E88E5'");
     expect(GAME_CODE).toContain("'#43A047'");
     expect(GAME_CODE).toContain("'#FB8C00'");
@@ -138,8 +138,8 @@ describeGame('Game Constants', () => {
     expect(GAME_CODE).toContain('[[-1,0],[1,0],[0,-1],[0,1]]');
   });
 
-  it('should have RANK_UP_THRESHOLD', () => {
-    expect(GAME_CODE).toContain('RANK_UP_THRESHOLD = 5');
+  it('should have rankThreshold function', () => {
+    expect(GAME_CODE).toContain('function rankThreshold');
   });
 
   it('should have CAT_NAMES mapping', () => {
@@ -190,18 +190,11 @@ describeGame('Game Functions', () => {
   it('should have getStartPositions function', () =>
     expect(GAME_CODE).toContain('function getStartPositions'));
   it('should have shuffle function', () => expect(GAME_CODE).toContain('function shuffle'));
-  it('should have loadQCache function', () => expect(GAME_CODE).toContain('function loadQCache'));
-  it('should have saveQCache function', () => expect(GAME_CODE).toContain('function saveQCache'));
   it('should have loadQuestions function', () =>
     expect(GAME_CODE).toContain('function loadQuestions'));
   it('should have qBankTotal function', () => expect(GAME_CODE).toContain('function qBankTotal'));
   it('should have updateQBankDisplay function', () =>
     expect(GAME_CODE).toContain('function updateQBankDisplay'));
-  it('should have cleanHtml function', () => expect(GAME_CODE).toContain('function cleanHtml'));
-  it('should have convertTriviaQ function', () =>
-    expect(GAME_CODE).toContain('function convertTriviaQ'));
-  it('should have debouncedFetch function', () =>
-    expect(GAME_CODE).toContain('function debouncedFetch'));
   it('should have setPlayerCount function', () =>
     expect(GAME_CODE).toContain('function setPlayerCount'));
   it('should have setBoardSize function', () =>
@@ -273,19 +266,6 @@ describeGame('Game Functions', () => {
   it('should have renderAll function', () => expect(GAME_CODE).toContain('function renderAll'));
 });
 
-describeGame('Question Data', () => {
-  it('should have BUILTIN_Q constant', () => expect(GAME_CODE).toContain('const BUILTIN_Q'));
-  it('should have HRBA_Q constant', () => expect(GAME_CODE).toContain('const HRBA_Q'));
-  it('should have art questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('art: ['));
-  it('should have geography questions in BUILTIN_Q', () =>
-    expect(GAME_CODE).toContain('geography: ['));
-  it('should have history questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('history: ['));
-  it('should have science questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('science: ['));
-  it('should have sport questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('sport: ['));
-  it('should have religion questions in BUILTIN_Q', () =>
-    expect(GAME_CODE).toContain('religion: ['));
-  it('should have general questions in BUILTIN_Q', () => expect(GAME_CODE).toContain('general: ['));
-});
 
 describeGame('Global Event Handlers', () => {
   it('should have keydown handler', () =>
@@ -357,66 +337,6 @@ describeGame('shuffle()', () => {
   });
 });
 
-describeGame('cleanHtml()', () => {
-  it('decodes common HTML entities', () => {
-    const g = createGameContext();
-    expect(g.cleanHtml('&amp;')).toBe('&');
-    expect(g.cleanHtml('&quot;')).toBe('"');
-    expect(g.cleanHtml('&lt;')).toBe('<');
-    expect(g.cleanHtml('&gt;')).toBe('>');
-    expect(g.cleanHtml('&#039;')).toBe("'");
-    expect(g.cleanHtml('&eacute;')).toBe('é');
-    expect(g.cleanHtml('&egrave;')).toBe('è');
-  });
-  it('leaves plain text unchanged', () => {
-    const g = createGameContext();
-    expect(g.cleanHtml('Hello World')).toBe('Hello World');
-  });
-  it('decodes multiple entities in one string', () => {
-    const g = createGameContext();
-    expect(g.cleanHtml('A &amp; B &lt; C')).toBe('A & B < C');
-  });
-});
-
-describeGame('convertTriviaQ()', () => {
-  it('converts a valid trivia question', () => {
-    const g = createGameContext();
-    const raw = {
-      question: { text: 'What is 2+2?' },
-      correctAnswer: 'Four',
-      incorrectAnswers: ['One', 'Two', 'Three'],
-    };
-    const result = g.convertTriviaQ(raw);
-    expect(result).not.toBeNull();
-    expect(result.opts).toHaveLength(4);
-    expect(result.opts).toContain('Four');
-    expect(result.opts[result.a]).toBe('Four');
-  });
-  it('returns null for missing question text', () => {
-    const g = createGameContext();
-    expect(g.convertTriviaQ(null)).toBeNull();
-    expect(g.convertTriviaQ({})).toBeNull();
-    expect(
-      g.convertTriviaQ({ question: {}, correctAnswer: 'A', incorrectAnswers: ['B', 'C', 'D'] })
-    ).toBeNull();
-  });
-  it('returns null when fewer than 3 incorrect answers', () => {
-    const g = createGameContext();
-    const raw = { question: { text: 'Q?' }, correctAnswer: 'A', incorrectAnswers: ['B'] };
-    expect(g.convertTriviaQ(raw)).toBeNull();
-  });
-  it('decodes HTML entities in question text and answers', () => {
-    const g = createGameContext();
-    const raw = {
-      question: { text: 'A &amp; B?' },
-      correctAnswer: '&lt;yes&gt;',
-      incorrectAnswers: ['no1', 'no2', 'no3'],
-    };
-    const result = g.convertTriviaQ(raw);
-    expect(result.q).toBe('A & B?');
-    expect(result.opts[result.a]).toBe('<yes>');
-  });
-});
 
 describeGame('checkWinCondition()', () => {
   it('returns -1 when multiple players have pegs', () => {
@@ -530,7 +450,7 @@ describeGame('getQuestion()', () => {
     g.getQuestion('art');
     expect(usedArt.size).toBe(1);
   });
-  it('clears used set and continues when all questions exhausted', () => {
+  it('returns null when all questions in all categories are exhausted', () => {
     const g = createGameContext();
     const qs = [
       { q: 'Q1?', opts: ['A', 'B', 'C', 'D'], a: 0 },
@@ -539,7 +459,7 @@ describeGame('getQuestion()', () => {
     g.State.questions = { ...EMPTY_QUESTIONS(), art: qs };
     g.State.game = { usedQ: { ...EMPTY_USED_Q(), art: new Set([0, 1]) } };
     const result = g.getQuestion('art');
-    expect(result).not.toBeNull();
+    expect(result).toBeNull();
   });
   it('falls back deterministically when requested category is empty', () => {
     const g = createGameContext();

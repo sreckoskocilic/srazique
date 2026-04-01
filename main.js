@@ -11,7 +11,7 @@ function log(level, ...args) {
   if (level === 'ERROR') {
     console.error(msg);
   } else {
-    console.warn(msg);
+    console.log(msg);
   }
   if (logFile) {
     try {
@@ -77,20 +77,17 @@ function createWindow() {
     win.webContents.openDevTools();
   }
 
-  // Security handlers
+  // Security handlers — always block external navigation regardless of dev/prod
   win.webContents.on('will-navigate', (event, url) => {
-    if (app.isPackaged) {
+    if (!url.startsWith('file://')) {
       event.preventDefault();
       log('WARN', `Blocked navigation to ${url}`);
     }
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (app.isPackaged) {
-      log('WARN', `Blocked window open to ${url}`);
-      return { action: 'deny' };
-    }
-    return { action: 'allow' };
+    log('WARN', `Blocked window open to ${url}`);
+    return { action: 'deny' };
   });
 
   win.webContents.on('render-process-gone', (event, details) => {
@@ -101,9 +98,11 @@ function createWindow() {
     log('ERROR', `Failed to load: ${errorDescription} (${errorCode})`);
   });
 
+  let saveStateTimer = null;
+  const debouncedSave = () => { clearTimeout(saveStateTimer); saveStateTimer = setTimeout(() => saveWindowState(win), 500); };
   win.on('close', () => saveWindowState(win));
-  win.on('resize', () => saveWindowState(win));
-  win.on('move', () => saveWindowState(win));
+  win.on('resize', debouncedSave);
+  win.on('move', debouncedSave);
   win.once('ready-to-show', () => win.show());
 
   // Load questions from encrypted file after page loads

@@ -250,22 +250,6 @@ body {
 .btn-primary:hover  { background: var(--primary-hover); }
 .btn-primary:active { transform: scale(0.97); background: var(--primary-active); }
 
-/* Board Preview */
-.board-preview {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  justify-content: center;
-}
-
-.board-preview-tile {
-  width: 20px;
-  height: 20px;
-  border-radius: 3px;
-}
-
-.board-preview-tile.active { background: var(--secondary); }
-.board-preview-tile.inactive { background: var(--bg-dark); opacity: 0.3; }
 
 /* Help & Settings Buttons */
 .setup-actions {
@@ -990,8 +974,8 @@ body {
   <div class="setup-section">
     <h3>Question Timer</h3>
     <div class="timer-setup-group" id="timer-setup" role="radiogroup" aria-label="Select timer duration">
-      <button class="timer-btn selected" data-seconds="15" onclick="setTimerDuration(15)" role="radio" aria-checked="false">15s</button>
-      <button class="timer-btn" data-seconds="30" onclick="setTimerDuration(30)" role="radio" aria-checked="true">30s</button>
+      <button class="timer-btn" data-seconds="15" onclick="setTimerDuration(15)" role="radio" aria-checked="false">15s</button>
+      <button class="timer-btn selected" data-seconds="30" onclick="setTimerDuration(30)" role="radio" aria-checked="true">30s</button>
       <button class="timer-btn" data-seconds="45" onclick="setTimerDuration(45)" role="radio" aria-checked="false">45s</button>
     </div>
   </div>
@@ -1033,7 +1017,7 @@ body {
 </div>
 
 <!-- GAME -->
-<div id="game-screen" role="main" aria-label="Game board">
+<div id="game-screen" role="region" aria-label="Game board">
   <div id="top-bar">
     <div id="turn-panel" role="status" aria-live="polite">
       <div id="turn-player-dot" aria-hidden="true"></div>
@@ -1246,6 +1230,13 @@ const State = {
     modal: null,
     turnPanel: null,
     turnPlayerDot: null,
+    timerBarFill: null,
+    timerText: null,
+    timerBtns: null,
+    catToggleBtns: null,
+    btnMaxRank: null,
+    advancedSection: null,
+    btnAdvanced: null,
   },
 
   dirty: {
@@ -1265,28 +1256,11 @@ const State = {
 const COLOR_OPTIONS = [
   '#E53935', '#1E88E5', '#43A047', '#FB8C00',
   '#8E24AA', '#00ACC1', '#FFB300', '#6D4C41',
-  '#D81B60', '#00897B', '#FB8C00', '#546E7A'
+  '#D81B60', '#00897B', '#F4511E', '#546E7A'
 ];
 
 // ===== UI/UX FUNCTIONS =====
 
-function updateBoardPreview() {
-  const preview = document.getElementById('board-preview');
-  if (!preview) return;
-  const size = State.setup.boardSize;
-  preview.innerHTML = '';
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 4; c++) {
-      const tile = document.createElement('div');
-      tile.className = 'board-preview-tile active';
-      const isCorner = (r === 0 || r === 3) && (c === 0 || c === 3);
-      if (size > 4 && isCorner) {
-        tile.style.background = 'var(--warning)';
-      }
-      preview.appendChild(tile);
-    }
-  }
-}
 
 function showColorPicker(playerIndex, button) {
   document.querySelectorAll('.player-color-picker').forEach(p => p.remove());
@@ -1358,6 +1332,7 @@ function playSound(type) {
 
     const now = ctx.currentTime;
 
+    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
     switch(type) {
       case 'select':
         osc.frequency.setValueAtTime(440, now);
@@ -1398,6 +1373,7 @@ function playSound(type) {
           const g = ctx.createGain();
           o.connect(g);
           g.connect(ctx.destination);
+          o.onended = () => { o.disconnect(); g.disconnect(); };
           o.frequency.setValueAtTime(freq, now + i * 0.15);
           g.gain.setValueAtTime(0.15, now + i * 0.15);
           g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.2);
@@ -1490,7 +1466,7 @@ function shuffle(arr) {
 
 // ---- Questions loaded from WASM via preload.js ----
 
-const COORD_BASE = 100;
+const COORD_BASE = 100; // encodes r*COORD_BASE+c; requires boardSize < COORD_BASE (max is 10)
 
 function loadQuestions() {
   if (State.questionsLoaded) return;
@@ -1523,7 +1499,7 @@ function setPlayerCount(n) {
 
 function toggleMaxRankStart() {
   State.setup.maxRankStart = !State.setup.maxRankStart;
-  document.getElementById('btn-max-rank').classList.toggle('selected', State.setup.maxRankStart);
+  State.DOM.btnMaxRank.classList.toggle('selected', State.setup.maxRankStart);
 }
 
 function toggleCat(cat) {
@@ -1535,14 +1511,16 @@ function toggleCat(cat) {
   } else {
     enabled.push(cat);
   }
-  const btn = document.querySelector(`#cat-toggle-btns [data-cat="${cat}"]`);
+  const btn = State.DOM.catToggleBtns?.get(cat);
   if (btn) btn.classList.toggle('active', idx < 0);
 }
 
 function setBoardSize(s) {
   State.setup.boardSize = s;
   State.DOM.boardSizeBtns.forEach(btn => {
-    btn.classList.toggle('active', +btn.dataset.size === s);
+    const isSelected = +btn.dataset.size === s;
+    btn.classList.toggle('active', isSelected);
+    btn.setAttribute('aria-checked', String(isSelected));
   });
   // Reload questions for new board size
   if (State.questionsLoaded) {
@@ -1595,7 +1573,6 @@ function renderPlayerInputs() {
     container.appendChild(add);
   }
 
-  updateBoardPreview();
 }
 
 function startGame() {
@@ -2467,6 +2444,15 @@ try {
   State.DOM.turnPanel       = document.getElementById('turn-panel');
   State.DOM.turnPlayerDot   = document.getElementById('turn-player-dot');
   State.DOM.playerStats     = document.getElementById('player-stats');
+  State.DOM.timerBarFill    = document.querySelector('.timer-bar-fill');
+  State.DOM.timerText       = document.getElementById('timer-text');
+  State.DOM.timerBtns       = document.querySelectorAll('.timer-btn[data-seconds]');
+  State.DOM.catToggleBtns   = new Map(
+    [...document.querySelectorAll('#cat-toggle-btns [data-cat]')].map(btn => [btn.dataset.cat, btn])
+  );
+  State.DOM.btnMaxRank      = document.getElementById('btn-max-rank');
+  State.DOM.advancedSection = document.getElementById('advanced-section');
+  State.DOM.btnAdvanced     = document.getElementById('btn-advanced');
   renderPlayerInputs();
   setBoardSize(8);
   loadQuestions();
@@ -2479,8 +2465,9 @@ try {
 function setTimerDuration(seconds) {
   if (!TIMER_OPTIONS.includes(seconds)) return;
   State.setup.timerDuration = seconds;
-  document.querySelectorAll('.timer-btn').forEach(btn => {
+  (State.DOM.timerBtns || document.querySelectorAll('.timer-btn[data-seconds]')).forEach(btn => {
     btn.classList.toggle('selected', parseInt(btn.dataset.seconds) === seconds);
+    btn.setAttribute('aria-checked', String(parseInt(btn.dataset.seconds) === seconds));
   });
 }
 
@@ -2508,8 +2495,8 @@ function stopTimer() {
 }
 
 function updateTimerDisplay() {
-  const bar = document.querySelector('.timer-bar-fill');
-  const text = document.getElementById('timer-text');
+  const bar = State.DOM.timerBarFill;
+  const text = State.DOM.timerText;
   if (!bar || !text) return;
   const pct = State.timer.total > 0 ? (State.timer.remaining / State.timer.total) * 100 : 0;
   bar.style.width = pct + '%';
@@ -2535,19 +2522,17 @@ function moveNavCursor(dr, dc) {
   highlightNavCursor();
 }
 
+let _navHighlightEl = null;
 function highlightNavCursor() {
-  document.querySelectorAll('.nav-highlight, .nav-highlight-peg').forEach(el => {
-    el.classList.remove('nav-highlight', 'nav-highlight-peg');
-  });
+  if (_navHighlightEl) {
+    _navHighlightEl.classList.remove('nav-highlight', 'nav-highlight-peg');
+    _navHighlightEl = null;
+  }
   const tile = State.DOM.tiles[State.navCursor.row]?.[State.navCursor.col];
   if (tile) {
-    // Check if there's a peg on this tile
     const tileData = State.game?.board[State.navCursor.row]?.[State.navCursor.col];
-    if (tileData?.pegId) {
-      tile.classList.add('nav-highlight-peg');
-    } else {
-      tile.classList.add('nav-highlight');
-    }
+    tile.classList.add(tileData?.pegId ? 'nav-highlight-peg' : 'nav-highlight');
+    _navHighlightEl = tile;
   }
 }
 
@@ -2584,10 +2569,9 @@ function handleBoardEnter() {
 }
 
 function toggleAdvancedSection() {
-  const s = document.getElementById('advanced-section');
-  const open = s.style.display === 'none';
-  s.style.display = open ? 'block' : 'none';
-  document.getElementById('btn-advanced').classList.toggle('active', open);
+  const open = State.DOM.advancedSection.style.display === 'none';
+  State.DOM.advancedSection.style.display = open ? 'block' : 'none';
+  State.DOM.btnAdvanced.classList.toggle('active', open);
 }
 
 // Keyboard shortcuts for question modal
