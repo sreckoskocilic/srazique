@@ -10,6 +10,8 @@ A modern resurrection of **Sraz**, the classic DOS-era strategy board game. Sraz
 
 This project was born out of a deep passion for quiz games and countless hours spent playing the original Sraz with friends — until we had memorized every question and started longing for a fresh set. Rather than just updating the question bank, I decided to rebuild the whole thing from scratch.
 
+In active development is a web implementation of the same engine and game logic used in this desktop app - https://sraz.nbastables.com
+
 > For the best overview of the original 1993 DOS game, see: [Sraz (1993) — prvi domaći kviz znanja na računalu koji je spojio igru i učenje](https://virus.hr/en/sraz-1993-prvi-domaci-kviz-znanja-na-racunalu-koji-je-spojio-igru-i-ucenje/)
 
 ## Screenshots
