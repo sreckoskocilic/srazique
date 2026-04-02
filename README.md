@@ -14,9 +14,17 @@ This project was born out of a deep passion for quiz games and countless hours s
 
 ## Screenshots
 
-![Board](screenshots/board.png)
-![Question](screenshots/question.png)
+
+> Game Setup
+![Game Setup](screenshots/game_setup.png)
+> Board 10x10
+![Board 10x10](screenshots/10x10.png)
+> Board 5x5
+![Board 5x5](screenshots/5x5.png)
+> Correct Answer
 ![Correct Answer](screenshots/correct.png)
+> Wrong Answer
+![Wrong Answer](screenshots/wrong.png)
 
 ## Features
 
