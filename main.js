@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { decryptQuestions } = require('./scripts/decrypt-questions.js');
 
 let logFile = null;
 let win = null;
@@ -117,77 +118,39 @@ function createWindow() {
   win.on('move', debouncedSave);
   win.once('ready-to-show', () => win.show());
 
-  // Load questions from encrypted file after page loads
-  win.webContents.on('did-finish-load', async () => {
-    const encPath = path.join(__dirname, 'questions.enc');
-    const jsonPath = path.join(__dirname, 'questions.json');
-
-    // Try encrypted file first, fall back to plain JSON
-    let questionsJson;
-    let source;
-
-    if (fs.existsSync(encPath)) {
-      try {
-        const { decryptQuestions } = require('./scripts/decrypt-questions.js');
-        const encrypted = fs.readFileSync(encPath, 'utf8');
-        questionsJson = decryptQuestions(encrypted);
-        source = 'encrypted';
-      } catch (e) {
-        log('WARN', 'Failed to decrypt questions:', e.message);
-      }
-    }
-
-    if (!questionsJson && fs.existsSync(jsonPath)) {
-      questionsJson = fs.readFileSync(jsonPath, 'utf8');
-      source = 'json';
-    }
-
-    if (!questionsJson) {
-      log('WARN', 'No questions file found');
-      return;
-    }
-
-    try {
-      const injectScript = `
-        (function() {
-          try {
-            window.SRAZ_QUESTIONS = JSON.parse(${JSON.stringify(questionsJson)});
-            console.log('Questions loaded from ${source}:', Object.keys(window.SRAZ_QUESTIONS).length, 'categories');
-            
-            // Log first few categories
-            var cats = Object.keys(window.SRAZ_QUESTIONS);
-            for (var i = 0; i < Math.min(3, cats.length); i++) {
-              console.log('  ' + cats[i] + ': ' + window.SRAZ_QUESTIONS[cats[i]].length + ' questions');
-            }
-            
-            // Reset and call loadQuestions
-            if (typeof State !== 'undefined' && State.questionsLoaded) {
-              State.questionsLoaded = false;
-            }
-            if (typeof loadQuestions === 'function') {
-              loadQuestions();
-              console.log('loadQuestions() called successfully');
-            }
-          } catch (e) {
-            console.error('Error loading questions:', e);
-          }
-        })();
-      `;
-
-      await win.webContents.executeJavaScript(injectScript);
-
-      const numCategories = await win.webContents.executeJavaScript(
-        'Object.keys(window.SRAZ_QUESTIONS || {}).length'
-      );
-      log('INFO', `Questions loaded from ${source}, ${numCategories} categories`);
-    } catch (e) {
-      log('ERROR', 'Failed to load questions:', e.message);
-    }
-  });
-
   win.loadFile('index.html');
   log('INFO', 'Window created');
 }
+
+ipcMain.handle('questions:get', async () => {
+  const encPath = path.join(__dirname, 'questions.enc');
+  const jsonPath = path.join(__dirname, 'questions.json');
+
+  try {
+    const encrypted = await fs.promises.readFile(encPath, 'utf8');
+    const json = decryptQuestions(encrypted);
+    log('INFO', 'Questions loaded (encrypted)');
+    return json;
+  } catch (e) {
+    if (e.code !== 'ENOENT') {
+      log('WARN', 'Failed to decrypt questions:', e.message);
+    }
+  }
+
+  try {
+    const json = await fs.promises.readFile(jsonPath, 'utf8');
+    log('INFO', 'Questions loaded (json)');
+    return json;
+  } catch (e) {
+    log(
+      'WARN',
+      e.code === 'ENOENT'
+        ? 'No questions file found'
+        : `Failed to read questions.json: ${e.message}`
+    );
+    return null;
+  }
+});
 
 app.whenReady().then(() => {
   const logDir = path.join(app.getPath('userData'), 'logs');
@@ -196,6 +159,20 @@ app.whenReady().then(() => {
   }
   logFile = path.join(logDir, `srazique-${new Date().toISOString().slice(0, 10)}.log`);
   windowStateFile = path.join(app.getPath('userData'), 'window-state.json');
+
+  // Purge log files older than 7 days
+  try {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    for (const f of fs.readdirSync(logDir)) {
+      const filePath = path.join(logDir, f);
+      if (fs.statSync(filePath).mtimeMs < cutoff) {
+        fs.unlinkSync(filePath);
+      }
+    }
+  } catch (e) {
+    log('WARN', 'Failed to purge old logs:', e.message);
+  }
+
   log('INFO', 'App ready');
   createWindow();
   app.on('activate', () => {

@@ -415,16 +415,15 @@ body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
-.cat-art .tile-cat-label           { color: #FFD6D6; } /* blush rose on red       */
-.cat-geography .tile-cat-label     { color: #C8F0CA; } /* mint on green           */
-.cat-history .tile-cat-label       { color: #FFE0C8; } /* warm cream on brown     */
-.cat-literature .tile-cat-label    { color: #E8CCFF; } /* soft lavender on purple */
-.cat-science .tile-cat-label       { color: #B2F0F5; } /* aqua on teal            */
-.cat-business .tile-cat-label      { color: #FFF0CC; } /* cream on orange         */
-.cat-sport .tile-cat-label         { color: #C5DCFF; } /* sky on blue             */
-.cat-religion .tile-cat-label      { color: #4A2800; text-shadow: 0 1px 2px rgba(255,255,255,0.3); } /* dark brown on amber */
-.cat-entertainment .tile-cat-label { color: #FFD6E8; } /* soft pink on magenta    */
-.cat-general .tile-cat-label       { color: #D6E8F0; } /* steel on blue-grey      */
+.cat-visual_arts .tile-cat-label     { color: #FFD6D6; } /* blush rose on red       */
+.cat-music .tile-cat-label          { color: #E8CCFF; } /* soft lavender on purple */
+.cat-film_tv .tile-cat-label        { color: #FFF8E1; } /* cream on amber          */
+.cat-books .tile-cat-label           { color: #C5DCFF; } /* sky on blue             */
+.cat-science .tile-cat-label        { color: #D6FFE8; } /* mint on green           */
+.cat-history .tile-cat-label        { color: #C8F0CA; } /* mint on brown           */
+.cat-geography .tile-cat-label      { color: #E0F7FA; } /* light cyan on teal      */
+.cat-sports .tile-cat-label         { color: #FFD6E8; } /* soft pink on magenta    */
+.cat-other .tile-cat-label          { color: #D6E8F0; } /* steel on blue-grey      */
 
 /* ===== PEGS (rounded square token) ===== */
 .peg {
@@ -894,16 +893,15 @@ body {
 }
 
 /* ===== CATEGORY COLORS ===== */
-.cat-art           { background: #C62828; } /* bold red       */
-.cat-geography     { background: #2E7D32; } /* forest green   */
-.cat-history       { background: #6D4C41; } /* warm brown     */
-.cat-literature    { background: #6A1B9A; } /* purple         */
-.cat-science       { background: #00838F; } /* cyan-teal      */
-.cat-business      { background: #E65100; } /* deep orange    */
-.cat-sport         { background: #1565C0; } /* strong blue    */
-.cat-religion      { background: #F9A825; } /* amber/gold     */
-.cat-entertainment { background: #AD1457; } /* magenta-pink   */
-.cat-general       { background: #546E7A; } /* blue-grey      */
+.cat-visual_arts     { background: #C62828; } /* bold red       */
+.cat-music          { background: #6A1B9A; } /* purple         */
+.cat-film_tv        { background: #F57F17; } /* amber/gold     */
+.cat-books           { background: #1565C0; } /* strong blue    */
+.cat-science        { background: #2E7D32; } /* forest green   */
+.cat-history        { background: #5D4037; } /* brown          */
+.cat-geography      { background: #00838F; } /* teal           */
+.cat-sports         { background: #AD1457; } /* magenta-pink   */
+.cat-other          { background: #546E7A; } /* blue-grey      */
 
 /* ===== TIMER ===== */
 .timer-bar-wrap { margin-top: 16px; }
@@ -957,12 +955,12 @@ body {
    <div class="setup-section">
      <h3>Board Size</h3>
      <div class="player-count-btns" id="board-size-btns" role="radiogroup" aria-label="Select board size">
-       <button onclick="setBoardSize(4)" data-size="4" role="radio" aria-checked="false">4×4</button>
-       <button onclick="setBoardSize(5)" data-size="5" role="radio" aria-checked="false">5×5</button>
-       <button onclick="setBoardSize(6)" data-size="6" role="radio" aria-checked="false">6×6</button>
-       <button onclick="setBoardSize(7)" data-size="7" role="radio" aria-checked="false">7×7</button>
-       <button onclick="setBoardSize(8)" data-size="8" class="active" role="radio" aria-checked="true">8×8</button>
-       <button onclick="setBoardSize(10)" data-size="10" role="radio" aria-checked="false">10×10</button>
+       <button data-size="4" role="radio" aria-checked="false">4×4</button>
+       <button data-size="5" role="radio" aria-checked="false">5×5</button>
+       <button data-size="6" role="radio" aria-checked="false">6×6</button>
+       <button data-size="7" role="radio" aria-checked="false">7×7</button>
+       <button data-size="8" class="active" role="radio" aria-checked="true">8×8</button>
+       <button data-size="10" role="radio" aria-checked="false">10×10</button>
      </div>
    </div>
 
@@ -974,42 +972,41 @@ body {
   <div class="setup-section">
     <h3>Question Timer</h3>
     <div class="timer-setup-group" id="timer-setup" role="radiogroup" aria-label="Select timer duration">
-      <button class="timer-btn" data-seconds="15" onclick="setTimerDuration(15)" role="radio" aria-checked="false">15s</button>
-      <button class="timer-btn selected" data-seconds="30" onclick="setTimerDuration(30)" role="radio" aria-checked="true">30s</button>
-      <button class="timer-btn" data-seconds="45" onclick="setTimerDuration(45)" role="radio" aria-checked="false">45s</button>
+      <button class="timer-btn" data-seconds="15" role="radio" aria-checked="false">15s</button>
+      <button class="timer-btn selected" data-seconds="30" role="radio" aria-checked="true">30s</button>
+      <button class="timer-btn" data-seconds="45" role="radio" aria-checked="false">45s</button>
     </div>
   </div>
 
-  <button id="start-btn" class="btn-primary" onclick="startGame()" aria-label="Start game">START GAME</button>
+  <button id="start-btn" class="btn-primary" aria-label="Start game">START GAME</button>
   <div id="qbank-count" style="margin-top:10px;text-align:center;font-size:0.75rem;color:#778;letter-spacing:1px;"></div>
 
   <div class="setup-actions">
-    <button onclick="showHelp()" aria-label="How to play">How to Play</button>
-    <button onclick="toggleHighContrast()" aria-label="Toggle high contrast mode">High Contrast</button>
-    <button onclick="toggleAdvancedSection()" id="btn-advanced" aria-label="Advanced settings">Settings</button>
+    <button id="btn-help" aria-label="How to play">How to Play</button>
+    <button id="btn-high-contrast" aria-label="Toggle high contrast mode">High Contrast</button>
+    <button id="btn-advanced" aria-label="Advanced settings">Settings</button>
   </div>
 
   <div id="advanced-section" style="display:none">
     <div class="setup-section" style="margin-top:14px">
       <h3>Game Options</h3>
       <div class="timer-setup-group">
-        <button class="timer-btn" id="btn-max-rank" onclick="toggleMaxRankStart()">Start as Vitez</button>
+        <button class="timer-btn" id="btn-max-rank">Start as Vitez</button>
       </div>
     </div>
 
     <div class="setup-section">
       <h3>Categories</h3>
       <div class="cat-toggle-btns" id="cat-toggle-btns" role="group" aria-label="Select question categories">
-        <button class="cat-toggle-btn active" data-cat="art" onclick="toggleCat('art')">Art</button>
-        <button class="cat-toggle-btn active" data-cat="geography" onclick="toggleCat('geography')">Geography</button>
-        <button class="cat-toggle-btn active" data-cat="history" onclick="toggleCat('history')">History</button>
-        <button class="cat-toggle-btn active" data-cat="literature" onclick="toggleCat('literature')">Literature</button>
-        <button class="cat-toggle-btn active" data-cat="science" onclick="toggleCat('science')">Science</button>
-        <button class="cat-toggle-btn active" data-cat="business" onclick="toggleCat('business')">Business</button>
-        <button class="cat-toggle-btn active" data-cat="sport" onclick="toggleCat('sport')">Sports</button>
-        <button class="cat-toggle-btn active" data-cat="religion" onclick="toggleCat('religion')">Religion</button>
-        <button class="cat-toggle-btn active" data-cat="entertainment" onclick="toggleCat('entertainment')">Entertainment</button>
-        <button class="cat-toggle-btn active" data-cat="general" onclick="toggleCat('general')">General</button>
+        <button class="cat-toggle-btn active" data-cat="visual_arts">Visual Arts</button>
+        <button class="cat-toggle-btn active" data-cat="music">Music</button>
+        <button class="cat-toggle-btn active" data-cat="film_tv">Film & TV</button>
+        <button class="cat-toggle-btn active" data-cat="books">Books</button>
+        <button class="cat-toggle-btn active" data-cat="science">Science</button>
+        <button class="cat-toggle-btn active" data-cat="history">History</button>
+        <button class="cat-toggle-btn active" data-cat="geography">Geography</button>
+        <button class="cat-toggle-btn active" data-cat="sports">Sports</button>
+        <button class="cat-toggle-btn active" data-cat="other">Other</button>
       </div>
     </div>
   </div>
@@ -1027,7 +1024,7 @@ body {
       </div>
       <div id="player-stats" aria-label="Player statistics"></div>
     </div>
-    <button id="quit-btn" onclick="quitGame()" title="Quit to setup" aria-label="Quit game">✕</button>
+    <button id="quit-btn" title="Quit to setup" aria-label="Quit game">✕</button>
   </div>
   <div id="board-wrap">
     <div id="board" role="grid" aria-label="Game board" tabindex="0"></div>
@@ -1049,7 +1046,7 @@ body {
     </div>
     <div class="modal-options" id="modal-options" role="group" aria-label="Answer options"></div>
     <div id="modal-continue-wrap" style="display:none">
-      <button id="modal-continue-btn" class="btn-primary" onclick="continueAfterQuestion()">CONTINUE</button>
+      <button id="modal-continue-btn" class="btn-primary">CONTINUE</button>
       <div id="modal-enter-hint">↵ Enter</div>
     </div>
   </div>
@@ -1066,8 +1063,8 @@ body {
   <h1 id="gameover-title">GAME OVER</h1>
   <div class="winner-text" id="winner-text" aria-label="Winner"></div>
   <div class="gameover-actions">
-    <button class="btn-primary" onclick="resetGame()">PLAY AGAIN</button>
-    <button class="btn-primary" onclick="quitGame()" style="background: var(--secondary);">NEW GAME</button>
+    <button id="btn-play-again" class="btn-primary">PLAY AGAIN</button>
+    <button id="btn-new-game" class="btn-primary" style="background: var(--secondary);">NEW GAME</button>
   </div>
 </div>
 
@@ -1105,7 +1102,7 @@ body {
       <li><strong>Escape</strong> — Cancel/pause</li>
     </ul>
 
-    <button class="btn-primary help-close" onclick="closeHelp()">GOT IT!</button>
+    <button id="btn-close-help" class="btn-primary help-close">GOT IT!</button>
   </div>
 </div>
 
@@ -1119,8 +1116,22 @@ window.SRAZ_QUESTIONS = {};
 // Web questions loading — fetch + XOR decrypt (mirrors main.js for Electron)
 // ---------------------------------------------------------------------------
 async function loadQuestionsWeb() {
-  // Skip in Electron — main.js handles injection
-  if (typeof window.electronAPI !== 'undefined') return;
+  if (typeof window.electronAPI !== 'undefined') {
+    // Electron: request questions via IPC instead of executeJavaScript injection
+    try {
+      const json = await window.electronAPI.getQuestions();
+      if (!json) return;
+      window.SRAZ_QUESTIONS = JSON.parse(json);
+      const cats = Object.keys(window.SRAZ_QUESTIONS);
+      console.log('Questions loaded via IPC:', cats.length, 'categories');
+      State.questionsLoaded = false;
+      loadQuestions();
+    } catch (e) {
+      console.error('IPC questions load failed:', e);
+    }
+    return;
+  }
+  // Web: fetch + XOR decrypt
   try {
     const resp = await fetch('questions.enc', { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -1167,8 +1178,8 @@ const PHASE = {
   GAME_OVER: 'gameOver',
 };
 
-const CATS = ['art','geography','history','literature','science','business','sport','religion','entertainment','general'];
-function rankThreshold() { return State.boardSize > 8 ? 5 : 3; }
+const CATS = ['visual_arts','music','film_tv','books','science','history','geography','sports','other'];
+function rankThreshold() { return State.setup.boardSize > 8 ? 5 : 3; }
 const SYM_FLAG   = '⚑';
 const SYM_COMBAT = '⚔';
 const OPTION_KEYS = ['A','B','C','D'];
@@ -1179,11 +1190,10 @@ const TIMER_DEFAULT = 30;
 const TIMER_TICK_MS = 100;
 const NAV_KEYS = {'ArrowUp':[-1,0], 'ArrowDown':[1,0], 'ArrowLeft':[0,-1], 'ArrowRight':[0,1]};
 function randomCat() { const cats = State.setup.enabledCats; return cats[Math.floor(Math.random() * cats.length)]; }
-function tileCat(tile) { return tile.category === 'flag' ? 'general' : tile.category; }
+function tileCat(tile) { return tile.category === 'flag' ? 'other' : tile.category; }
 const CAT_NAMES = {
-  art:'Art', geography:'Geography', history:'History', literature:'Literature',
-  science:'Science', business:'Business', sport:'Sports',
-  religion:'Religion', entertainment:'Entertainment', general:'General'
+  visual_arts:'Visual Arts', music:'Music', film_tv:'Film & TV', books:'Books', science:'Science',
+  history:'History', geography:'Geography', sports:'Sports', other:'Other'
 };
 
 // ============================================================
@@ -1385,7 +1395,7 @@ function playSound(type) {
 
 // Board layout generated randomly each game (F=flag corners, 0-9=category index)
 function generateLayoutMap() {
-  const S = State.boardSize;
+  const S = State.setup.boardSize;
   const isCorner = (r, c) => (r === 0 || r === S - 1) && (c === 0 || c === S - 1);
   const useFlagCorners = S > 4;
   const nonCorner = [];
@@ -1400,11 +1410,11 @@ function generateLayoutMap() {
   return map;
 }
 
-// Computed dynamically from State.boardSize before each game
+// Computed dynamically from State.setup.boardSize before each game
 // Corner ownership mirrors getStartPositions: 2p = TL+BR, 3p = TL+TR+BR, 4p = all
 function getCornerOwner(numPlayers) {
-  if (State.boardSize === 4) return {};
-  const S = State.boardSize - 1;
+  if (State.setup.boardSize === 4) return {};
+  const S = State.setup.boardSize - 1;
   const map = { '0,0': 0 };
   if (numPlayers === 2) {
     map[`${S},${S}`] = 1;
@@ -1420,9 +1430,9 @@ function getCornerOwner(numPlayers) {
 }
 
 function getStartPositions(numPlayers) {
-  const S = State.boardSize - 1;
+  const S = State.setup.boardSize - 1;
   // 4x4: one peg per player placed directly on their corner tile
-  if (State.boardSize === 4) {
+  if (State.setup.boardSize === 4) {
     const corners = [
       [{r:0,c:0}],   // P0 top-left
       [{r:0,c:S}],   // P1 top-right
@@ -1579,15 +1589,14 @@ function startGame() {
     return;
   }
 
-  State.boardSize = State.setup.boardSize;
-  document.documentElement.style.setProperty('--ts', `calc(var(--bs) / ${State.boardSize})`);
+  document.documentElement.style.setProperty('--ts', `calc(var(--bs) / ${State.setup.boardSize})`);
   const inputs = State.DOM.playerInputs.querySelectorAll('input');
   const names = [];
   for (let i = 0; i < State.setup.playerCount; i++) {
     names.push(inputs[i].value.trim() || DEFAULT_NAMES[i]);
   }
   initGame(names);
-  State.DOM.board.style.setProperty('--board-cols', State.boardSize);
+  State.DOM.board.style.setProperty('--board-cols', State.setup.boardSize);
   State.DOM.setupScreen.style.display = 'none';
   State.DOM.gameScreen.style.display = 'flex';
   State.dirty.board = true;
@@ -1609,9 +1618,9 @@ function initGame(playerNames) {
   const layoutMap = generateLayoutMap();
   const cornerOwnerMap = getCornerOwner(numPlayers);
   const board = [];
-  for (let r = 0; r < State.boardSize; r++) {
+  for (let r = 0; r < State.setup.boardSize; r++) {
     board[r] = [];
-    for (let c = 0; c < State.boardSize; c++) {
+    for (let c = 0; c < State.setup.boardSize; c++) {
       const val = layoutMap[r][c];
       board[r][c] = {
         category: val === 'F' ? 'flag' : State.setup.enabledCats[val],
@@ -1674,7 +1683,7 @@ function currentPlayer() {
 function getAdjacentTiles(r, c) {
   return DIRS
     .map(([dr,dc]) => ({r: r+dr, c: c+dc}))
-    .filter(p => p.r >= 0 && p.r < State.boardSize && p.c >= 0 && p.c < State.boardSize);
+    .filter(p => p.r >= 0 && p.r < State.setup.boardSize && p.c >= 0 && p.c < State.setup.boardSize);
 }
 
 function getEligiblePegs() {
@@ -1757,7 +1766,7 @@ function eliminatePeg(pegId) {
 }
 
 function movePegTo(pegId, r, c) {
-  const S = State.boardSize;
+  const S = State.setup.boardSize;
   if (r < 0 || r >= S || c < 0 || c >= S) return;
   const peg = State.game.pegs[pegId];
   if (!peg) return;
@@ -1785,7 +1794,7 @@ function pushPegAway(pegId) {
   let curR = pegR + pushDr;
   let curC = pegC + pushDc;
   
-  while (curR >= 0 && curR < State.boardSize && curC >= 0 && curC < State.boardSize) {
+  while (curR >= 0 && curR < State.setup.boardSize && curC >= 0 && curC < State.setup.boardSize) {
     const tile = State.game.board[curR][curC];
     if (tile.pegId) {
       pushedPegs.push(tile.pegId);
@@ -1797,7 +1806,7 @@ function pushPegAway(pegId) {
   }
   
   // If final position is off board, eliminate the last peg
-  if (curR < 0 || curR >= State.boardSize || curC < 0 || curC >= State.boardSize) {
+  if (curR < 0 || curR >= State.setup.boardSize || curC < 0 || curC >= State.setup.boardSize) {
     const lastPegId = pushedPegs.pop();
     eliminatePeg(lastPegId);
   }
@@ -2209,7 +2218,7 @@ function flushUpdates() {
     if (State.dirty.board) buildBoardDOM();
     State.dirty.board = false;
     State.dirty.allTiles = false;
-    const S = State.boardSize;
+    const S = State.setup.boardSize;
     for (let r = 0; r < S; r++)
       for (let c = 0; c < S; c++)
         updateTileDOM(r, c);
@@ -2246,7 +2255,7 @@ function buildBoardDOM() {
   };
 
 
-  const S = State.boardSize;
+  const S = State.setup.boardSize;
 
   for (let r = 0; r < S; r++) {
     State.DOM.tiles[r] = [];
@@ -2627,6 +2636,26 @@ document.addEventListener('keydown', e => {
   if (!State.game || !State.DOM.modalOverlay.classList.contains('visible')) return;
   const key = e.key.toLowerCase();
   if (key in KEY_MAP) onAnswer(KEY_MAP[key]);
+});
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  if (btn.dataset.size) { setBoardSize(parseInt(btn.dataset.size, 10)); return; }
+  if (btn.dataset.seconds) { setTimerDuration(parseInt(btn.dataset.seconds, 10)); return; }
+  if (btn.dataset.cat) { toggleCat(btn.dataset.cat); return; }
+  switch (btn.id) {
+    case 'start-btn': startGame(); break;
+    case 'quit-btn': quitGame(); break;
+    case 'modal-continue-btn': continueAfterQuestion(); break;
+    case 'btn-max-rank': toggleMaxRankStart(); break;
+    case 'btn-advanced': toggleAdvancedSection(); break;
+    case 'btn-help': showHelp(); break;
+    case 'btn-high-contrast': toggleHighContrast(); break;
+    case 'btn-play-again': resetGame(); break;
+    case 'btn-new-game': quitGame(); break;
+    case 'btn-close-help': closeHelp(); break;
+  }
 });
 </script>
 </body>

@@ -1,19 +1,41 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
-import { VM } from 'vm2';
+import vm from 'node:vm';
 
 const PROJECT_ROOT = process.cwd();
 const CLEAN_HTML_PATH = path.join(PROJECT_ROOT, 'index.html');
 const CLEAN_HTML = fs.existsSync(CLEAN_HTML_PATH) ? fs.readFileSync(CLEAN_HTML_PATH, 'utf8') : null;
 
-const SCRIPT_MATCH = CLEAN_HTML ? CLEAN_HTML.match(/<script>([\s\S]*?)<\/script>/) : null;
-const GAME_CODE = SCRIPT_MATCH ? SCRIPT_MATCH[1] : '';
+const SCRIPT_MATCHES = CLEAN_HTML
+  ? [...CLEAN_HTML.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)]
+  : [];
+const GAME_CODE = SCRIPT_MATCHES.reduce(
+  (longest, m) => (m[1].length > longest.length ? m[1] : longest),
+  ''
+);
 
 const describeGame = CLEAN_HTML ? describe : describe.skip;
 
+// Compile the game script once — avoids re-parsing 77KB of JS per test
+const COMPILED_SCRIPT = GAME_CODE
+  ? new vm.Script(`
+    (function() {
+      ${GAME_CODE}
+      return {
+        State, PHASE, CATS, PLAYER_COLORS, COORD_BASE,
+        shuffle,
+        checkWinCondition, rankUp, rankDown,
+        getQuestion, getValidMoves, eliminatePeg, movePegTo,
+        getAdjacentTiles, randomCat,
+        handleCombatQ1, handleCombatQ2, handleNormalMove, handleFlagQ, finishBattle,
+      };
+    })()
+  `)
+  : null;
+
 // Creates an isolated game context and returns the exported functions/state.
-// Uses vm2 for ES6 support (arrow functions, const/let, template literals)
+// Uses Node.js built-in vm module for ES6 support (arrow functions, const/let, template literals)
 function createGameContext() {
   const mockElement = () => ({
     querySelectorAll: () => [],
@@ -50,27 +72,9 @@ function createGameContext() {
     body: mockElement(),
   };
 
-  const vm2 = new VM({
-    sandbox: sandbox,
-    eval: false,
-    wasm: false,
-  });
-
-  const wrappedCode = `
-    (function() {
-      ${GAME_CODE}
-      return {
-        State, PHASE, CATS, PLAYER_COLORS, COORD_BASE,
-        shuffle,
-        checkWinCondition, rankUp, rankDown,
-        getQuestion, getValidMoves, eliminatePeg, movePegTo,
-        getAdjacentTiles, randomCat,
-        handleCombatQ1, handleCombatQ2, handleNormalMove, handleFlagQ, finishBattle,
-      };
-    })()
-  `;
-
-  return vm2.run(wrappedCode);
+  // Create a fresh context from the sandbox
+  const context = vm.createContext(sandbox);
+  return COMPILED_SCRIPT.runInContext(context, { timeout: 5000 });
 }
 
 describeGame('Game Constants', () => {
@@ -105,17 +109,16 @@ describeGame('Game Constants', () => {
     expect(GAME_CODE).toContain("GAME_OVER: 'gameOver'");
   });
 
-  it('should have CATS array with 10 categories', () => {
-    expect(GAME_CODE).toContain("'art'");
-    expect(GAME_CODE).toContain("'geography'");
-    expect(GAME_CODE).toContain("'history'");
-    expect(GAME_CODE).toContain("'literature'");
+  it('should have CATS array with 9 categories', () => {
+    expect(GAME_CODE).toContain("'visual_arts'");
+    expect(GAME_CODE).toContain("'music'");
+    expect(GAME_CODE).toContain("'film_tv'");
+    expect(GAME_CODE).toContain("'books'");
     expect(GAME_CODE).toContain("'science'");
-    expect(GAME_CODE).toContain("'business'");
-    expect(GAME_CODE).toContain("'sport'");
-    expect(GAME_CODE).toContain("'religion'");
-    expect(GAME_CODE).toContain("'entertainment'");
-    expect(GAME_CODE).toContain("'general'");
+    expect(GAME_CODE).toContain("'history'");
+    expect(GAME_CODE).toContain("'geography'");
+    expect(GAME_CODE).toContain("'sports'");
+    expect(GAME_CODE).toContain("'other'");
   });
 
   it('should have SYM_FLAG and SYM_COMBAT', () => {
@@ -143,9 +146,9 @@ describeGame('Game Constants', () => {
   });
 
   it('should have CAT_NAMES mapping', () => {
-    expect(GAME_CODE).toContain("art:'Art'");
-    expect(GAME_CODE).toContain("geography:'Geography'");
-    expect(GAME_CODE).toContain("history:'History'");
+    expect(GAME_CODE).toContain("visual_arts:'Visual Arts'");
+    expect(GAME_CODE).toContain("music:'Music'");
+    expect(GAME_CODE).toContain("film_tv:'Film & TV'");
   });
 });
 
@@ -303,16 +306,15 @@ describeGame('Clean HTML Structure', () => {
 // ============================================================
 
 const ALL_CATS = [
-  'art',
-  'geography',
-  'history',
-  'literature',
+  'visual_arts',
+  'music',
+  'film_tv',
+  'books',
   'science',
-  'business',
-  'sport',
-  'religion',
-  'entertainment',
-  'general',
+  'history',
+  'geography',
+  'sports',
+  'other',
 ];
 const EMPTY_USED_Q = () => Object.fromEntries(ALL_CATS.map((c) => [c, new Set()]));
 const EMPTY_QUESTIONS = () => Object.fromEntries(ALL_CATS.map((c) => [c, []]));
@@ -429,45 +431,46 @@ describeGame('getQuestion()', () => {
     const g = createGameContext();
     g.State.questions = EMPTY_QUESTIONS();
     g.State.game = { usedQ: EMPTY_USED_Q() };
-    expect(g.getQuestion('art')).toBeNull();
+    expect(g.getQuestion('visual_arts')).toBeNull();
   });
   it('returns a question with correct category tag', () => {
     const g = createGameContext();
-    const q = { q: 'What is art?', opts: ['A', 'B', 'C', 'D'], a: 0 };
-    g.State.questions = { ...EMPTY_QUESTIONS(), art: [q] };
+    const q = { q: 'What is visual arts?', opts: ['A', 'B', 'C', 'D'], a: 0 };
+    g.State.questions = { ...EMPTY_QUESTIONS(), visual_arts: [q] };
     g.State.game = { usedQ: EMPTY_USED_Q() };
-    const result = g.getQuestion('art');
+    const result = g.getQuestion('visual_arts');
     expect(result).not.toBeNull();
-    expect(result.q).toBe('What is art?');
-    expect(result.category).toBe('art');
+    expect(result.q).toBe('What is visual arts?');
+    expect(result.category).toBe('visual_arts');
   });
-  it('marks the returned question as used', () => {
-    const g = createGameContext();
-    const q = { q: 'Q?', opts: ['A', 'B', 'C', 'D'], a: 0 };
-    g.State.questions = { ...EMPTY_QUESTIONS(), art: [q] };
-    const usedArt = new Set();
-    g.State.game = { usedQ: { ...EMPTY_USED_Q(), art: usedArt } };
-    g.getQuestion('art');
-    expect(usedArt.size).toBe(1);
-  });
-  it('returns null when all questions in all categories are exhausted', () => {
-    const g = createGameContext();
-    const qs = [
-      { q: 'Q1?', opts: ['A', 'B', 'C', 'D'], a: 0 },
-      { q: 'Q2?', opts: ['A', 'B', 'C', 'D'], a: 1 },
-    ];
-    g.State.questions = { ...EMPTY_QUESTIONS(), art: qs };
-    g.State.game = { usedQ: { ...EMPTY_USED_Q(), art: new Set([0, 1]) } };
-    const result = g.getQuestion('art');
-    expect(result).toBeNull();
-  });
+    it('marks the returned question as used', () => {
+      const g = createGameContext();
+      const q = { q: 'Q?', opts: ['A', 'B', 'C', 'D'], a: 0 };
+      const usedVisualArts = new Set();
+      g.State.game = { usedQ: { ...EMPTY_USED_Q(), visual_arts: usedVisualArts } };
+      g.State.setup = { enabledCats: ALL_CATS };
+      g.State.questions = { ...EMPTY_QUESTIONS(), visual_arts: [q] };
+      g.getQuestion('visual_arts');
+      expect(usedVisualArts.size).toBe(1);
+    });
+    it('returns null when all questions in all categories are exhausted', () => {
+      const g = createGameContext();
+      const qs = [
+        { q: 'Q1?', opts: ['A', 'B', 'C', 'D'], a: 0 },
+        { q: 'Q2?', opts: ['A', 'B', 'C', 'D'], a: 1 },
+      ];
+      g.State.questions = { ...EMPTY_QUESTIONS(), visual_arts: qs };
+      g.State.game = { usedQ: { ...EMPTY_USED_Q(), visual_arts: new Set([0, 1]) } };
+      const result = g.getQuestion('visual_arts');
+      expect(result).toBeNull();
+    });
   it('falls back deterministically when requested category is empty', () => {
     const g = createGameContext();
     const q = { q: 'A geography Q?', opts: ['A', 'B', 'C', 'D'], a: 0 };
     // Only geography has questions; art is empty — fallback must find geography
     g.State.questions = { ...EMPTY_QUESTIONS(), geography: [q] };
     g.State.game = { usedQ: EMPTY_USED_Q() };
-    const result = g.getQuestion('art');
+    const result = g.getQuestion('visual_arts');
     expect(result).not.toBeNull();
     expect(result.category).toBe('geography');
   });
@@ -475,7 +478,7 @@ describeGame('getQuestion()', () => {
     const g = createGameContext();
     g.State.questions = EMPTY_QUESTIONS();
     g.State.game = { usedQ: EMPTY_USED_Q() };
-    expect(g.getQuestion('art')).toBeNull();
+    expect(g.getQuestion('visual_arts')).toBeNull();
   });
 });
 
@@ -509,7 +512,7 @@ describeGame('getValidMoves()', () => {
   it('returns all 4 adjacent tiles from center of open board', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
-    const emptyTile = () => ({ category: 'art', pegId: null, cornerOwner: null });
+    const emptyTile = () => ({ category: 'visual_arts', pegId: null, cornerOwner: null });
     g.State.game = {
       board: [
         [emptyTile(), emptyTile(), emptyTile()],
@@ -525,7 +528,7 @@ describeGame('getValidMoves()', () => {
   it('returns only 2 moves from a corner', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
-    const emptyTile = () => ({ category: 'art', pegId: null, cornerOwner: null });
+    const emptyTile = () => ({ category: 'visual_arts', pegId: null, cornerOwner: null });
     g.State.game = {
       board: [
         [emptyTile(), emptyTile(), emptyTile()],
@@ -541,7 +544,7 @@ describeGame('getValidMoves()', () => {
   it('excludes tiles occupied by own player pegs', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
-    const emptyTile = () => ({ category: 'art', pegId: null, cornerOwner: null });
+    const emptyTile = () => ({ category: 'visual_arts', pegId: null, cornerOwner: null });
     g.State.game = {
       board: [
         [emptyTile(), emptyTile(), emptyTile()],
@@ -561,7 +564,7 @@ describeGame('getValidMoves()', () => {
   it('allows moving onto enemy peg tiles (combat)', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
-    const emptyTile = () => ({ category: 'art', pegId: null, cornerOwner: null });
+    const emptyTile = () => ({ category: 'visual_arts', pegId: null, cornerOwner: null });
     g.State.game = {
       board: [
         [emptyTile(), emptyTile(), emptyTile()],
@@ -586,7 +589,7 @@ describeGame('validMoves encoding consistency', () => {
   it('validMoves is always a Set of encoded numbers, not an array of objects', () => {
     const g = createGameContext();
     g.State.boardSize = 3;
-    const emptyTile = () => ({ category: 'art', pegId: null, cornerOwner: null });
+    const emptyTile = () => ({ category: 'visual_arts', pegId: null, cornerOwner: null });
     g.State.game = {
       board: [
         [emptyTile(), emptyTile(), emptyTile()],
